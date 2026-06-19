@@ -1,0 +1,2352 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ServiceNow CSA Full Quiz (English)</title>
+  <style>
+    :root { --accent:#2563eb; --ok:#16a34a; --ng:#dc2626; --bg:#f8fafc; --card:#fff; --text:#0f172a; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; padding: 2rem 1rem; }
+    .container { max-width: 920px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid #e5e7eb; border-radius: 12px; padding: 1rem 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 1rem; }
+    h1 { font-size: 1.5rem; margin: 0 0 .75rem; }
+    .question-title { font-weight: 600; margin-bottom: .5rem; }
+    .options label { display:block; padding:.45rem .6rem; border-radius: 8px; cursor:pointer; }
+    .options label:hover { background:#f1f5f9; }
+    .actions { display:flex; gap:.5rem; margin-top:.75rem; flex-wrap:wrap; }
+    button { background: var(--accent); color:#fff; border:none; border-radius:8px; padding:.5rem .9rem; font-weight:600; cursor:pointer; }
+    button.secondary { background:#64748b; }
+    .feedback { margin-top:.5rem; font-weight:600; }
+    .feedback.ok { color: var(--ok); }
+    .feedback.ng { color: var(--ng); }
+    .hidden { display:none; }
+    .explain { background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px; padding:.75rem; margin-top:.5rem; white-space:pre-wrap; }
+    .meta { display:flex; justify-content:space-between; align-items:center; font-size:.9rem; color:#475569; }
+    .progress { height:6px; background:#e5e7eb; border-radius:999px; overflow:hidden; margin:.5rem 0 1rem; }
+    .progress > div { height:100%; width:0; background: var(--accent); transition: width .25s ease; }
+    .summary { font-weight:600; }
+    .is-selected { outline:2px solid #33415544; }
+    .is-correct { background:#dcfce7; }
+    .is-wrongselected { background:#fee2e2; }
+    .disabled { opacity:.7; pointer-events:none; }
+    .toolbar { display:flex; gap:.75rem; align-items:center; flex-wrap:wrap; margin:.5rem 0 0; }
+    .badge { display:inline-flex; gap:.35rem; align-items:center; font-size:.85rem; border:1px solid #cbd5e1; padding:.2rem .5rem; border-radius:8px; color:#334155; background:#f1f5f9; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ServiceNow CSA Full Quiz (English)</h1>
+
+    <div class="toolbar card">
+      <label class="badge"><input type="checkbox" id="rand-questions" checked /> Randomize question order</label>
+      <label class="badge"><input type="checkbox" id="rand-options" /> Randomize answer choices</label>
+      <span class="badge">Block size: 60</span>
+      <div class="badge">Block <span id="block-index">1</span>/<span id="block-total">-</span>
+        <button id="block-prev" class="secondary" style="margin-left:.5rem">◀ Prev 60</button>
+        <button id="block-next" class="secondary">Next 60 ▶</button>
+      </div>
+      <button id="reshuffle-btn" class="secondary">Re-shuffle</button>
+    </div>
+
+    <div class="card" id="quiz-card">
+      <div class="meta">
+        <div id="counter">Q <span id="qnum">1</span> / <span id="qtotal">-</span> (this block)</div>
+        <div class="summary">Correct: <span id="score">0</span></div>
+      </div>
+      <div class="progress" aria-hidden="true"><div id="bar"></div></div>
+
+      <div id="question-block"></div>
+      <div class="actions" id="controls">
+        <button id="submit-btn">Submit Answer</button>
+        <button id="next-btn" class="secondary" disabled>Next Question →</button>
+        <button id="show-explain-btn" class="secondary hidden">💡 Show Explanation</button>
+        <button id="reset-btn" class="secondary">Reset</button>
+        <label class="badge"><input type="checkbox" id="auto-next" /> Auto-advance after answer</label>
+      </div>
+
+      <div id="feedback" class="feedback hidden" aria-live="polite"></div>
+      <div id="discussion" class="explain hidden" aria-live="polite"></div>
+    </div>
+
+    <div class="card hidden" id="result-card">
+      <h2>Results (this block)</h2>
+      <p>Score: <strong id="final-score"></strong> / <span id="final-total"></span></p>
+      <div class="actions">
+        <button id="retry-btn" class="secondary">Retry these 60</button>
+        <button id="goto-next-block">Next 60 ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+const quizData = {
+  title: "ServiceNow CSA Full Quiz",
+  questions: [
+    { id: 'q1', type: 'single', text: 'Which of the following components can be found in a Service Catalog?', options: [
+      { value: 'a', label: 'Order Guides, Exchange Rates, and Calendars' },
+      { value: 'b', label: 'Order Guides, Catalog Items, and Interceptors' },
+      { value: 'c', label: 'Catalog Items, Asset Contracts, and Task Surveys' },
+      { value: 'd', label: 'Record Producers, Order Guides, and Catalog Items' }
+    ], correct: ['d'], discussion: 'D is correct. A Service Catalog contains: Record Producers (alternative way to add information through the catalog, e.g., creating incidents), Order Guides (bundle multiple catalog items into one request), and Catalog Items (individual items users can request).' },
+
+    { id: 'q2', type: 'single', text: 'When a field is coalesced during an import, which of the following statements is true?', options: [
+      { value: 'a', label: 'If a match is found using the coalesce field, the existing record is updated with the imported information' },
+      { value: 'b', label: 'If a match is not found using the coalesce field, the system will not create a transform map' },
+      { value: 'c', label: 'If a match is found using the coalesce field, the system creates a new record' },
+      { value: 'd', label: 'If a match is not found using the coalesce field, the existing record is updated with the imported information' }
+    ], correct: ['a'], discussion: 'A is correct. If an existing record with a matching value is found in the target table, that record is updated. If no matching record is found, a new record is created in the target table.' },
+
+    { id: 'q3', type: 'single', text: 'Which statement correctly describes the function of metrics in ServiceNow reporting?', options: [
+      { value: 'a', label: 'Metrics are report gauges used on homepages that display real-time data' },
+      { value: 'b', label: 'Metrics are time measurements used to report on the effectiveness of workflows and SLAs' },
+      { value: 'c', label: 'Metrics are used to measure and evaluate the effectiveness of IT service management processes' },
+      { value: 'd', label: 'Metrics are comparative measurements used to report on the effectiveness of flows and SLAs' }
+    ], correct: ['c'], discussion: 'C is correct. Metrics are created to evaluate changes to fields on tasks — they measure and evaluate the effectiveness of ITSM processes, such as calculating the time taken to resolve incidents.' },
+
+    { id: 'q4', type: 'single', text: 'The display order of Service Catalog items is controlled using which of the following?', options: [
+      { value: 'a', label: 'The "Default Value" field on the catalog item form' },
+      { value: 'b', label: 'The "Order" field on the catalog item form' },
+      { value: 'c', label: 'The Order field on the variable form' },
+      { value: 'd', label: 'The "Choices" field on the variable form' }
+    ], correct: ['c'], discussion: 'C is correct. The Order field on the variable form controls the display sequence of variables in a catalog item.' },
+
+    { id: 'q5', type: 'multi', text: 'From which two different locations within the platform can you create a report? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'A list column heading' },
+      { value: 'b', label: 'The Metrics module' },
+      { value: 'c', label: 'The Statistics module' },
+      { value: 'd', label: 'The View/Run module' }
+    ], correct: ['a', 'd'], discussion: 'A and D are correct. Reports can be created from a list column heading or from the View/Run module.' },
+
+    { id: 'q6', type: 'multi', text: 'Knowledge base search results can be sorted by which of the following? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'Most recent update' },
+      { value: 'b', label: 'Popularity' },
+      { value: 'c', label: 'Relevance' },
+      { value: 'd', label: 'Assigned to' },
+      { value: 'e', label: 'Number of views' }
+    ], correct: ['a', 'c', 'e'], discussion: 'A, C, and E are correct. Knowledge base search results can be sorted by Most Recent Update, Relevance, and Number of Views.' },
+
+    { id: 'q7', type: 'single', text: 'What is the correct sequence to view the fulfillment stage task list for an order placed by a user?', options: [
+      { value: 'a', label: 'RITM (number) > REQ (number) > PROCUREMENT (number)' },
+      { value: 'b', label: 'REQ (number) > RITM (number) > Procurement (number)' },
+      { value: 'c', label: 'REQ (number) > RITM (number) > TASK (number)' },
+      { value: 'd', label: 'FULFILLMENT (number) > RITM (number) > TASK (number)' }
+    ], correct: ['c'], discussion: 'C is correct. REQ contains RITMs; RITMs contain SCTASKs. When a catalog item is ordered, a single RITM is generated for each item, grouped under a parent REQ. Workflows may create SCTASK records as children of the RITM.' },
+
+    { id: 'q8', type: 'single', text: 'Which term describes application menus or modules that a user wants to access quickly and frequently?', options: [
+      { value: 'a', label: 'Breadcrumbs' },
+      { value: 'b', label: 'Favorites' },
+      { value: 'c', label: 'Tags' },
+      { value: 'd', label: 'Bookmarks' }
+    ], correct: ['b'], discussion: 'B is correct. Favorites allow users to quickly access frequently used application menus or modules.' },
+
+    { id: 'q9', type: 'single', text: 'What is generated from the Service Catalog when a user orders an item or service?', options: [
+      { value: 'a', label: 'A Change Request' },
+      { value: 'b', label: 'An Order Guide' },
+      { value: 'c', label: 'A Request' },
+      { value: 'd', label: 'An SLA' }
+    ], correct: ['c'], discussion: 'C is correct. When a user places an order, a Request (REQ) record is generated from the Service Catalog.' },
+
+    { id: 'q10', type: 'multi', text: 'From the User menu, which actions can a user select? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'Send a notification' },
+      { value: 'b', label: 'Log out of ServiceNow' },
+      { value: 'c', label: 'Elevate Role' },
+      { value: 'd', label: 'Impersonate User' },
+      { value: 'e', label: 'Order from Service Catalog' },
+      { value: 'f', label: 'Approve a record' }
+    ], correct: ['b', 'c', 'd'], discussion: 'B, C, and D are correct. From the User menu, a user can: Log out, Elevate Role (requires security_admin), and Impersonate User (requires admin).' },
+
+    { id: 'q11', type: 'single', text: 'Buttons, form links, and context menu items are all examples of which feature?', options: [
+      { value: 'a', label: 'Business Rules' },
+      { value: 'b', label: 'UI Actions' },
+      { value: 'c', label: 'Client Scripts' },
+      { value: 'd', label: 'UI Policies' }
+    ], correct: ['b'], discussion: 'B is correct. UI Actions define buttons, links, and context menu items that perform specific actions when clicked.' },
+
+    { id: 'q12', type: 'single', text: 'Regarding the Service Catalog, which of the following is true about catalog items?', options: [
+      { value: 'a', label: 'They run in the background' },
+      { value: 'b', label: 'They are building blocks' },
+      { value: 'c', label: 'They are optional' },
+      { value: 'd', label: 'They provide options' }
+    ], correct: ['b'], discussion: 'B is correct. Catalog items are the fundamental building blocks of a Service Catalog, representing individual services or products that users can request.' },
+
+    { id: 'q13', type: 'single', text: 'Table access control rules are processed in the following order:', options: [
+      { value: 'a', label: 'Any table name (wildcard), parent table name, table name' },
+      { value: 'b', label: 'Table name, parent table name, any table name (wildcard)' },
+      { value: 'c', label: 'Parent table name, table name, any table name (wildcard)' },
+      { value: 'd', label: 'Any table name (wildcard), table name, parent table name' }
+    ], correct: ['b'], discussion: 'B is correct. ACL rules are evaluated from most specific to most general: 1) Table name match (e.g., incident), 2) Parent table name match (e.g., task), 3) Any table (*) match.' },
+
+    { id: 'q14', type: 'single', text: 'What is the platform name for the User table?', options: [
+      { value: 'a', label: 'u_users' },
+      { value: 'b', label: 'sys_users' },
+      { value: 'c', label: 'x_users' },
+      { value: 'd', label: 'sys_user' }
+    ], correct: ['d'], discussion: 'D is correct. The User table platform name is sys_user. User records are stored in the Users [sys_user] table.' },
+
+    { id: 'q15', type: 'single', text: 'The REQ number in Service Catalog represents:', options: [
+      { value: 'a', label: 'The order number' },
+      { value: 'b', label: 'A stage' },
+      { value: 'c', label: 'A task to be completed' },
+      { value: 'd', label: 'An individual item in an order' }
+    ], correct: ['a'], discussion: 'A is correct. REQ represents the order number. A single REQ can contain multiple RITMs (Requested Items).' },
+
+    { id: 'q16', type: 'single', text: 'Which of the following is NOT shown in the History section of the Application Navigator?', options: [
+      { value: 'a', label: 'Records' },
+      { value: 'b', label: 'UI Pages' },
+      { value: 'c', label: 'Lists' },
+      { value: 'd', label: 'Forms' }
+    ], correct: ['b'], discussion: 'B is correct. UI Pages are not tracked in the History section. Lists and forms appear in history, but UI pages and other non-standard interfaces are not tracked.' },
+
+    { id: 'q17', type: 'single', text: 'Which statement reflects ServiceNow\'s recommendation about update sets?', options: [
+      { value: 'a', label: 'Do not use the Default update set when moving customizations between instances' },
+      { value: 'b', label: 'Before moving customizations between instances, ensure both instances are running different versions' },
+      { value: 'c', label: 'Update sets should be tested in production before applying to development' },
+      { value: 'd', label: 'The Default update set can be used but must be exported as XML first' }
+    ], correct: ['a'], discussion: 'A is correct. ServiceNow recommends using named update sets rather than the Default update set when moving customizations between instances.' },
+
+    { id: 'q18', type: 'single', text: 'Which of the following best describes a "role" in ServiceNow?', options: [
+      { value: 'a', label: 'A set of permissions that define what a user can and cannot do' },
+      { value: 'b', label: 'A user group based on department' },
+      { value: 'c', label: 'A workflow step assigned to a user' },
+      { value: 'd', label: 'A category of catalog items' }
+    ], correct: ['a'], discussion: 'A is correct. A role is a collection of permissions granted to users to define what they can and cannot access or do in ServiceNow.' },
+
+    { id: 'q19', type: 'single', text: 'Which type of script is used to make fields mandatory, read-only, or hidden based on conditions, and runs on the client side?', options: [
+      { value: 'a', label: 'Business Rule' },
+      { value: 'b', label: 'Client Script' },
+      { value: 'c', label: 'Script Include' },
+      { value: 'd', label: 'UI Script' }
+    ], correct: ['b'], discussion: 'B is correct. Client Scripts run in the browser and can dynamically change form behavior based on conditions.' },
+
+    { id: 'q20', type: 'single', text: 'What is the correct way to navigate to a specific record using the Application Navigator filter?', options: [
+      { value: 'a', label: 'Type the table name followed by .list to see all records' },
+      { value: 'b', label: 'Type the record number directly into any search field' },
+      { value: 'c', label: 'Use the global search bar at the top of the page' },
+      { value: 'd', label: 'Both A and C are correct' }
+    ], correct: ['d'], discussion: 'D is correct. You can navigate to records using the Application Navigator filter (tablename.list) or the global search bar.' },
+
+    { id: 'q21', type: 'single', text: 'What are the components of a flow in Flow Designer?', options: [
+      { value: 'a', label: 'Triggers, Actions, and Flow Logic' },
+      { value: 'b', label: 'Triggers, Conditions, and Scripts' },
+      { value: 'c', label: 'Events, Tasks, and Approvals' },
+      { value: 'd', label: 'Workflows, Subflows, and Actions' }
+    ], correct: ['a'], discussion: 'A is correct. Flows in Flow Designer consist of Triggers (what starts the flow), Actions (what the flow does), and Flow Logic (conditions and branching).' },
+
+    { id: 'q22', type: 'single', text: 'Which module would you use to view all available knowledge bases?', options: [
+      { value: 'a', label: 'Knowledge > Home' },
+      { value: 'b', label: 'Self-Service > Knowledge' },
+      { value: 'c', label: 'Knowledge > All' },
+      { value: 'd', label: 'Knowledge > Knowledge Bases' }
+    ], correct: ['b'], discussion: 'B is correct. End users access available knowledge bases through Self-Service > Knowledge.' },
+
+    { id: 'q23', type: 'single', text: 'What is a Configuration Item (CI)?', options: [
+      { value: 'a', label: 'Any component that needs to be managed to deliver a service' },
+      { value: 'b', label: 'A template for creating catalog items' },
+      { value: 'c', label: 'A hardware asset tracked in the asset module' },
+      { value: 'd', label: 'A configurable field in a ServiceNow form' }
+    ], correct: ['a'], discussion: 'A is correct. A Configuration Item (CI) is any component that needs to be managed in order to deliver an IT service.' },
+
+    { id: 'q24', type: 'single', text: 'Which statement about access control lists (ACLs) in ServiceNow is correct?', options: [
+      { value: 'a', label: 'ACLs are only applied to table-level access' },
+      { value: 'b', label: 'ACLs can protect tables, records, and fields' },
+      { value: 'c', label: 'ACLs can only be defined by the security_admin role' },
+      { value: 'd', label: 'ACLs are evaluated from most general to most specific' }
+    ], correct: ['b'], discussion: 'B is correct. ACLs in ServiceNow can protect tables, individual records, and specific fields.' },
+
+    { id: 'q25', type: 'single', text: 'Which of the following is a feature of the Service Portal?', options: [
+      { value: 'a', label: 'It is the same as the standard ServiceNow interface' },
+      { value: 'b', label: 'It provides a consumer-grade self-service experience for end users' },
+      { value: 'c', label: 'It can only be accessed by administrators' },
+      { value: 'd', label: 'It replaces the Application Navigator' }
+    ], correct: ['b'], discussion: 'B is correct. The Service Portal provides a consumer-grade, self-service experience designed for end users to submit requests, search knowledge, and track requests.' },
+
+    { id: 'q26', type: 'single', text: 'What is the purpose of a Transform Map in ServiceNow?', options: [
+      { value: 'a', label: 'To map fields from an import set table to a target table' },
+      { value: 'b', label: 'To transform workflow steps into flow actions' },
+      { value: 'c', label: 'To convert report types between formats' },
+      { value: 'd', label: 'To migrate update sets between instances' }
+    ], correct: ['a'], discussion: 'A is correct. A Transform Map defines the field relationships between an import set (staging) table and the target table in ServiceNow.' },
+
+    { id: 'q27', type: 'single', text: 'What is the difference between a "group" and a "role" in ServiceNow?', options: [
+      { value: 'a', label: 'Groups contain users; roles contain permissions. Roles are assigned to groups or users.' },
+      { value: 'b', label: 'Roles contain users; groups contain permissions.' },
+      { value: 'c', label: 'Groups and roles are interchangeable terms in ServiceNow.' },
+      { value: 'd', label: 'Groups are only used for assignment; roles are used for notifications.' }
+    ], correct: ['a'], discussion: 'A is correct. Groups are collections of users. Roles are collections of permissions. Roles can be assigned to users directly or inherited through group membership.' },
+
+    { id: 'q28', type: 'single', text: 'Which ServiceNow application is primarily used to load data into ServiceNow?', options: [
+      { value: 'a', label: 'Import Hub' },
+      { value: 'b', label: 'System Import Sets' },
+      { value: 'c', label: 'Data Import Configuration' },
+      { value: 'd', label: 'Import Manager' }
+    ], correct: ['b'], discussion: 'B is correct. System Import Sets is the primary application used for loading data into ServiceNow.' },
+
+    { id: 'q29', type: 'single', text: 'What is the purpose of a Business Rule in ServiceNow?', options: [
+      { value: 'a', label: 'To define the layout of form fields' },
+      { value: 'b', label: 'To run server-side logic when records are displayed, inserted, updated, deleted, or queried' },
+      { value: 'c', label: 'To control which fields are visible to end users' },
+      { value: 'd', label: 'To create automated approval workflows' }
+    ], correct: ['b'], discussion: 'B is correct. Business Rules are server-side scripts that run when records are displayed, inserted, updated, deleted, or queried.' },
+
+    { id: 'q30', type: 'single', text: 'What does "dot-walking" allow you to do in ServiceNow?', options: [
+      { value: 'a', label: 'Navigate through related records to access fields on reference tables' },
+      { value: 'b', label: 'Create a breadcrumb trail of recently visited records' },
+      { value: 'c', label: 'Walk through each step in a workflow visually' },
+      { value: 'd', label: 'Apply filters using multiple conditions' }
+    ], correct: ['a'], discussion: 'A is correct. Dot-walking allows you to traverse relationships between tables to access fields on related records.' },
+
+    { id: 'q31', type: 'single', text: 'Which ServiceNow feature provides a visual, drag-and-drop interface for managing personal tasks?', options: [
+      { value: 'a', label: 'Service Desk' },
+      { value: 'b', label: 'Virtual Agent Homepage' },
+      { value: 'c', label: 'Visual Task Board' },
+      { value: 'd', label: 'Personal Task Tracker' }
+    ], correct: ['c'], discussion: 'C is correct. Visual Task Boards provide a visual, drag-and-drop Kanban-style interface for managing personal tasks.' },
+
+    { id: 'q32', type: 'single', text: 'Which type of field displays a Boolean value as a checkbox?', options: [
+      { value: 'a', label: 'Yes/No' },
+      { value: 'b', label: 'True/False' },
+      { value: 'c', label: 'On/Off' },
+      { value: 'd', label: 'Binary' }
+    ], correct: ['b'], discussion: 'B is correct. The True/False field type displays as a checkbox in ServiceNow.' },
+
+    { id: 'q33', type: 'single', text: 'What is the CMDB used for in ServiceNow?', options: [
+      { value: 'a', label: 'To store all email notification templates' },
+      { value: 'b', label: 'To provide a logical model of the enterprise infrastructure by identifying, controlling, and verifying CIs' },
+      { value: 'c', label: 'To manage user authentication and access control' },
+      { value: 'd', label: 'To store import set data before transformation' }
+    ], correct: ['b'], discussion: 'B is correct. The Configuration Management Database (CMDB) provides a logical model of the enterprise infrastructure by identifying, controlling, maintaining, and verifying Configuration Items (CIs).' },
+
+    { id: 'q34', type: 'single', text: 'Which of the following can be used to quickly filter a list to show only records matching a specific value?', options: [
+      { value: 'a', label: 'Right-click a value in the list and select "Show Matching"' },
+      { value: 'b', label: 'Click the funnel icon and type the value' },
+      { value: 'c', label: 'Double-click the column header' },
+      { value: 'd', label: 'Use the global search bar' }
+    ], correct: ['a'], discussion: 'A is correct. Right-clicking a value in a list and selecting "Show Matching" quickly filters the list to show records matching that value.' },
+
+    { id: 'q35', type: 'single', text: 'What is the first step in the data import process using Import Sets?', options: [
+      { value: 'a', label: 'Run the data scrubber' },
+      { value: 'b', label: 'Configure coalescing' },
+      { value: 'c', label: 'Select the Import Set' },
+      { value: 'd', label: 'Load Data' }
+    ], correct: ['d'], discussion: 'D is correct. The first step when importing spreadsheet data is to Load Data into the staging (import set) table.' },
+
+    { id: 'q36', type: 'single', text: 'Which module is used to create a new notification in ServiceNow?', options: [
+      { value: 'a', label: 'System Notification > Email > Notifications' },
+      { value: 'b', label: 'Administration > Notifications Overview' },
+      { value: 'c', label: 'System Properties > Email > Settings' },
+      { value: 'd', label: 'User Settings > Email > Notifications' }
+    ], correct: ['a'], discussion: 'A is correct. New notifications are created via System Notification > Email > Notifications.' },
+
+    { id: 'q37', type: 'single', text: 'Which of the following correctly describes the Incident table relationship to the Task table?', options: [
+      { value: 'a', label: 'The Incident table has a one-to-many relationship with the Task table' },
+      { value: 'b', label: 'The Incident table is derived/extended from the Task table' },
+      { value: 'c', label: 'The Incident table is linked to the Task table via the INC number' },
+      { value: 'd', label: 'The Incident table has a many-to-many relationship with the Task table' }
+    ], correct: ['b'], discussion: 'B is correct. The Incident table extends the Task table — it is a child table that inherits fields and functionality from the Task table.' },
+
+    { id: 'q38', type: 'single', text: 'What is the primary difference between Performance Analytics and Reporting?', options: [
+      { value: 'a', label: 'Performance Analytics captures snapshots of data over time; Reports show data only as of the time the report is run' },
+      { value: 'b', label: 'Performance Analytics can show trends but Reports cannot' },
+      { value: 'c', label: 'Reports can be scheduled but Performance Analytics cannot' },
+      { value: 'd', label: 'Performance Analytics data can be published to dashboards but reports cannot' }
+    ], correct: ['a'], discussion: 'A is correct. Performance Analytics captures periodic snapshots to generate accurate historical trends, while Reports show a point-in-time snapshot of current data.' },
+
+    { id: 'q39', type: 'single', text: 'Which feature allows non-technical users to orchestrate business processes across services?', options: [
+      { value: 'a', label: 'Flow Manager' },
+      { value: 'b', label: 'Flow Designer' },
+      { value: 'c', label: 'Flow Editor' },
+      { value: 'd', label: 'Workflow Editor' }
+    ], correct: ['b'], discussion: 'B is correct. Flow Designer provides a low-code interface that allows non-technical users to automate processes and create workflows.' },
+
+    { id: 'q40', type: 'single', text: 'What is an Order Guide in the Service Catalog?', options: [
+      { value: 'a', label: 'A guide for administrators to configure catalog items' },
+      { value: 'b', label: 'A catalog feature that bundles multiple catalog items into a single request' },
+      { value: 'c', label: 'A document explaining how to complete a service request' },
+      { value: 'd', label: 'A template for creating catalog items' }
+    ], correct: ['b'], discussion: 'B is correct. An Order Guide allows multiple catalog items to be bundled together into a single request, useful for onboarding scenarios where multiple items are needed at once.' },
+
+    { id: 'q41', type: 'single', text: 'What is the purpose of the "Impersonate User" feature?', options: [
+      { value: 'a', label: 'To permanently take over another user\'s account' },
+      { value: 'b', label: 'To temporarily act as another user for testing or troubleshooting purposes' },
+      { value: 'c', label: 'To allow a user to grant their permissions to another user' },
+      { value: 'd', label: 'To view another user\'s personal settings' }
+    ], correct: ['b'], discussion: 'B is correct. Impersonate User allows an admin to temporarily act as another user to test what they see and troubleshoot issues.' },
+
+    { id: 'q42', type: 'single', text: 'Which of the following is the correct sequence to apply an update set to an instance?', options: [
+      { value: 'a', label: 'Retrieve, Preview, Commit' },
+      { value: 'b', label: 'Specify, Transform, Apply' },
+      { value: 'c', label: 'Retrieve, Evaluate, Apply' },
+      { value: 'd', label: 'Retrieve, Test, Push' }
+    ], correct: ['a'], discussion: 'A is correct. The steps to apply an update set are: Retrieve (from source instance), Preview (check for conflicts), Commit (apply changes).' },
+
+    { id: 'q43', type: 'single', text: 'When creating a new notification, which three items must be defined? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'The associated knowledge base' },
+      { value: 'b', label: 'How inactive user accounts are handled' },
+      { value: 'c', label: 'The condition under which the notification is sent' },
+      { value: 'd', label: 'Who receives the notification' },
+      { value: 'e', label: 'The content of the notification' }
+    ], correct: ['c', 'd', 'e'], discussion: 'C, D, and E are correct. When creating a notification, you must define: When (the condition), Who (recipients), and What (the notification content).' },
+
+    { id: 'q44', type: 'single', text: 'Which of the following correctly describes what a Record Producer does?', options: [
+      { value: 'a', label: 'Creates catalog items for the Service Catalog' },
+      { value: 'b', label: 'Provides an alternative way to create task-based records (such as incidents) through the Service Catalog' },
+      { value: 'c', label: 'Generates automated reports on catalog usage' },
+      { value: 'd', label: 'Produces configuration records from CI data' }
+    ], correct: ['b'], discussion: 'B is correct. A Record Producer provides an alternative way to create task-based records (e.g., Incidents, Changes) through the Service Catalog interface.' },
+
+    { id: 'q45', type: 'single', text: 'Which module is used to customize the banner image, text, and colors of an instance?', options: [
+      { value: 'a', label: 'System UI > UI Page > Branding' },
+      { value: 'b', label: 'Service Portal > Portals > Branding' },
+      { value: 'c', label: 'System Properties > Basic Configuration UI16' },
+      { value: 'd', label: 'System Properties > Branding' }
+    ], correct: ['c'], discussion: 'C is correct. The banner image, text, and colors are customized via System Properties > Basic Configuration UI16.' },
+
+    { id: 'q46', type: 'single', text: 'How are table access control rules processed?', options: [
+      { value: 'a', label: 'Table name, parent table name, wildcard (*)' },
+      { value: 'b', label: 'Wildcard (*), parent table name, table name' },
+      { value: 'c', label: 'Parent table name, table name, wildcard (*)' },
+      { value: 'd', label: 'Wildcard (*), table name, parent table name' }
+    ], correct: ['a'], discussion: 'A is correct. ACL rules are evaluated from most specific to least specific: table name first, then parent table name, then wildcard (*).' },
+
+    { id: 'q47', type: 'single', text: 'What type of users in ServiceNow have clearly defined paths and workflows, holding one or more roles such as ITIL and approver_user?', options: [
+      { value: 'a', label: 'Workflow Users' },
+      { value: 'b', label: 'Request Fulfillers' },
+      { value: 'c', label: 'ITSM Users' },
+      { value: 'd', label: 'Approval Managers' },
+      { value: 'e', label: 'Service Desk Users' },
+      { value: 'f', label: 'Process Users (Fulfillers)' }
+    ], correct: ['f'], discussion: 'F is correct. Process Users (Fulfillers) are a defined persona in ServiceNow with clearly defined paths and workflows. They hold one or more roles (e.g., itil, approver_user) and have full feature access based on assigned roles.' },
+
+    { id: 'q48', type: 'single', text: 'Which of the following scripts runs in the browser?', options: [
+      { value: 'a', label: 'Script Include scripts' },
+      { value: 'b', label: 'Access Control scripts' },
+      { value: 'c', label: 'Business Rule scripts' },
+      { value: 'd', label: 'UI Policies and Client Scripts' }
+    ], correct: ['d'], discussion: 'D is correct. UI Policies and Client Scripts both run on the client side (in the browser).' },
+
+    { id: 'q49', type: 'single', text: 'Which of the following correctly describes the order in which access controls are evaluated?', options: [
+      { value: 'a', label: 'Field level (most specific to most general); then Table level (most specific to most general)' },
+      { value: 'b', label: 'Field level (most general to most specific); then Row level (most specific to most general)' },
+      { value: 'c', label: 'Table level (most specific to most general); then Field level (most specific to most general)' },
+      { value: 'd', label: 'Table level (most specific to most general); then Record level (most specific to most general)' }
+    ], correct: ['c'], discussion: 'C is correct. Access controls are always evaluated at the table level first (most specific to most general), then at the field level (most specific to most general).' },
+
+    { id: 'q50', type: 'single', text: 'Which ServiceNow feature helps automatically assign high-priority service requests to the appropriate assignment group or team member?', options: [
+      { value: 'a', label: 'Assignment Rules' },
+      { value: 'b', label: 'User Policies' },
+      { value: 'c', label: 'Predictive Intelligence' },
+      { value: 'd', label: 'UI Policies' }
+    ], correct: ['a'], discussion: 'A is correct. Assignment Rules automatically assign tasks and records to the appropriate assignment group or individual based on predefined criteria.' },
+
+    { id: 'q51', type: 'single', text: 'What is the section in Report Designer used to specify the groupings and calculations performed on data?', options: [
+      { value: 'a', label: 'Style' },
+      { value: 'b', label: 'Grouping' },
+      { value: 'c', label: 'Configure' },
+      { value: 'd', label: 'Formatting' },
+      { value: 'e', label: 'Data' }
+    ], correct: ['c'], discussion: 'C is correct. The "Configure" section of the Report Designer is where you specify groupings and calculations. The four sections are: Data, Type, Configure, and Style.' },
+
+    { id: 'q52', type: 'single', text: 'What icon do you use to change the color or icon of a Favorite?', options: [
+      { value: 'a', label: 'Clock' },
+      { value: 'b', label: 'Pencil' },
+      { value: 'c', label: 'Triangle' },
+      { value: 'd', label: 'Star' }
+    ], correct: ['b'], discussion: 'B is correct. The pencil icon is used to edit Favorites (change color or icon). The star icon is used to add items to Favorites.' },
+
+    { id: 'q53', type: 'single', text: 'What is the best way to experience a newly released ServiceNow application?', options: [
+      { value: 'a', label: 'Search for a sales demo request form on the Wiki' },
+      { value: 'b', label: 'Check the latest release notes on docs.servicenow.com' },
+      { value: 'c', label: 'Activate the application plugin on your Personal Developer Instance (PDI)' },
+      { value: 'd', label: 'Activate the application plugin on the company\'s production instance' }
+    ], correct: ['c'], discussion: 'C is correct. The best way to get hands-on experience with a new application is to activate the application plugin on your Personal Developer Instance (PDI).' },
+
+    { id: 'q54', type: 'single', text: 'When viewing a long list of records, how do you quickly filter to show only records where Short Description contains "email"?', options: [
+      { value: 'a', label: 'Click the list magnifier to expand column search and type "email" in the Short Description field' },
+      { value: 'b', label: 'Select text in the search box and type "email" then press Enter' },
+      { value: 'c', label: 'Click the list magnifier and type "*email" in the Short Description column' },
+      { value: 'd', label: 'Click the list magnifier and type "%email" in the Short Description field' }
+    ], correct: ['c'], discussion: 'C is correct. "*email" is a wildcard search that returns records where Short Description contains the word "email". The % wildcard matches records ending with "email".' },
+
+    { id: 'q55', type: 'single', text: 'In a many-to-many table relationship, which scenario is an example?', options: [
+      { value: 'a', label: 'A vendor can sell multiple products, and a product can be sold by multiple vendors' },
+      { value: 'b', label: 'A task can trigger multiple workflows, and a workflow can trigger multiple tasks' },
+      { value: 'c', label: 'A request can contain multiple items, and items can be from any catalog item' },
+      { value: 'd', label: 'A CI can belong to multiple classes, and a class can contain multiple CIs' }
+    ], correct: ['a'], discussion: 'A is correct. A vendor selling multiple products and a product being sold by multiple vendors is a classic many-to-many relationship example, as described in ServiceNow training materials.' },
+
+    { id: 'q56', type: 'single', text: 'Which icon in the Application Navigator would you double-click to expand and collapse all applications and modules?', options: [
+      { value: 'a', label: 'Star' },
+      { value: 'b', label: 'Clock' },
+      { value: 'c', label: 'Application' },
+      { value: 'd', label: 'Funnel' }
+    ], correct: ['c'], discussion: 'C is correct. Double-clicking the Application icon expands and collapses all applications and modules in the Application Navigator.' },
+
+    { id: 'q57', type: 'single', text: 'What do components that need to be managed to deliver a service represent in the CMDB context?', options: [
+      { value: 'a', label: 'CSDM Items' },
+      { value: 'b', label: 'CMDB' },
+      { value: 'c', label: 'Configuration Items' },
+      { value: 'd', label: 'Service Offerings' },
+      { value: 'e', label: 'Assets' }
+    ], correct: ['c'], discussion: 'C is correct. Configuration Items (CIs) are components that need to be managed in order to deliver IT services.' },
+
+    { id: 'q58', type: 'single', text: 'To restrict a new Service Catalog item to only be visible to managers within the HR department, which method should you use?', options: [
+      { value: 'a', label: 'Assign the Dept_Mgr role to the catalog content block' },
+      { value: 'b', label: 'Add the "Department Manager" group to the User Criteria of the catalog item' },
+      { value: 'c', label: 'Add the "Department Manager" group to the ACL of the catalog item' },
+      { value: 'd', label: 'Publish the item only within the HR Service Catalog' },
+      { value: 'e', label: 'Apply the Dept_Mgr ACL to the HR Service Catalog' }
+    ], correct: ['b'], discussion: 'B is correct. Catalog items use User Criteria (not ACLs) to control visibility. Adding the "Department Manager" group to the User Criteria restricts visibility to that group.' },
+
+    { id: 'q59', type: 'single', text: 'To create a filter condition that shows incidents where State is "Closed" AND Assignment Group is "Network", what should the user do after clicking the funnel icon?', options: [
+      { value: 'a', label: 'Define first condition → click AND → define second condition → click Run' },
+      { value: 'b', label: 'Define first condition → click AND → define second condition → press Enter' },
+      { value: 'c', label: 'Define first condition; click OR; define second condition; press Enter' },
+      { value: 'd', label: 'Define first condition; click > icon on breadcrumb; define second condition; click Run' }
+    ], correct: ['a'], discussion: 'A is correct. When filtering with multiple AND conditions, you define the first condition, click AND, define the second condition, then click Run.' },
+
+    { id: 'q60', type: 'single', text: 'What is the object name for an ACL rule specific to the incident table and the major_incident field?', options: [
+      { value: 'a', label: 'Incident.Major_Incident' },
+      { value: 'b', label: 'incident=>major_incident' },
+      { value: 'c', label: 'incident<=>major_incident' },
+      { value: 'd', label: 'incident||major_incident' },
+      { value: 'e', label: 'incident.major_incident' }
+    ], correct: ['e'], discussion: 'E is correct. ACL object names use lowercase and underscores: incident.major_incident (table name dot field name, all lowercase).' },
+
+    { id: 'q61', type: 'single', text: 'Two departments (HR Onboarding and Facilities Management) both need to allow employees to request an event room setup service, using the same form and routing, but each has its own catalog. What is the best approach?', options: [
+      { value: 'a', label: 'Create two catalog items and publish each to the appropriate catalog' },
+      { value: 'b', label: 'Create one catalog item and publish it to both catalogs' },
+      { value: 'c', label: 'Create one catalog item and publish it to a parent catalog accessible by both' },
+      { value: 'd', label: 'Create one catalog item and control access via ACL' }
+    ], correct: ['b'], discussion: 'B is correct. In ServiceNow, a single catalog item can be published to multiple catalogs, avoiding duplication while maintaining a single source of truth.' },
+
+    { id: 'q62', type: 'single', text: 'After finishing high-security settings work, how do you return to the normal administrator security level?', options: [
+      { value: 'a', label: 'Select Normal Role' },
+      { value: 'b', label: 'Log out and log back in' },
+      { value: 'c', label: 'Use System Administration > Normal Security module' },
+      { value: 'd', label: 'Select the Global Update Set' },
+      { value: 'e', label: 'End impersonation' }
+    ], correct: ['b'], discussion: 'B is correct. Elevated roles (security_admin) end when the user logs out. The session ends the elevated privilege.' },
+
+    { id: 'q63', type: 'single', text: 'Which type of field can look up values from another table?', options: [
+      { value: 'a', label: 'Reference' },
+      { value: 'b', label: 'Verity' },
+      { value: 'c', label: 'Option' },
+      { value: 'd', label: 'Choice' },
+      { value: 'e', label: 'Dot-Walk' },
+      { value: 'f', label: 'Lookup' }
+    ], correct: ['a'], discussion: 'A is correct. A Reference field establishes a relationship between two tables and allows looking up values from another table.' },
+
+    { id: 'q64', type: 'single', text: 'Which module would you use to create new automation for approvals, tasks, and notifications?', options: [
+      { value: 'a', label: 'Process Automation > Flow Designer' },
+      { value: 'b', label: 'Process Automation > Flow Management' },
+      { value: 'c', label: 'Process Automation > Workflow Editor' },
+      { value: 'd', label: 'Process Automation > Process Flows' },
+      { value: 'e', label: 'Process Automation > Active Flows' }
+    ], correct: ['a'], discussion: 'A is correct. Flow Designer is the module used to create new automation for approvals, tasks, notifications, and business logic.' },
+
+    { id: 'q65', type: 'single', text: 'An analyst has been asked by a department manager to create a report. Where should the analyst start?', options: [
+      { value: 'a', label: 'Reports Dashboard > New' },
+      { value: 'b', label: 'Reports > Getting Started' },
+      { value: 'c', label: 'Performance Analytics > Reports' },
+      { value: 'd', label: 'Self-Service > Reports' },
+      { value: 'e', label: 'Reports > Create New' }
+    ], correct: ['e'], discussion: 'E is correct. To create a new report, navigate to Reports > Create New. Option B (Getting Started) goes to ServiceNow documentation, not the report creation interface.' },
+
+    { id: 'q66', type: 'single', text: 'When importing spreadsheet data, in which step is data written to the receiving (target) table?', options: [
+      { value: 'a', label: 'Run Transform' },
+      { value: 'b', label: 'Run Import' },
+      { value: 'c', label: 'Import Data Set' },
+      { value: 'd', label: 'Execute Transform' },
+      { value: 'e', label: 'Schedule Transform' }
+    ], correct: ['a'], discussion: 'A is correct. The "Run Transform" step executes the transform map and writes data from the import set (staging) table to the target table.' },
+
+    { id: 'q67', type: 'multi', text: 'How can you group records in a list by the "Category" column? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'In the list context menu, select Group By > Category' },
+      { value: 'b', label: 'In the Filter menu, select Group By > Category' },
+      { value: 'c', label: 'Click the group icon and select Category' },
+      { value: 'd', label: 'Type "tablename.group.category" in the navigator filter and press Enter' },
+      { value: 'e', label: 'Right-click the Category column title in the context menu and select Group By Category' }
+    ], correct: ['a', 'e'], discussion: 'A and E are correct. You can group by a column by using the list context menu (Group By > Category) or by right-clicking the column header and selecting Group By.' },
+
+    { id: 'q68', type: 'single', text: 'Which collaboration tool, accessible via the bubble icon in the banner, is available?', options: [
+      { value: 'a', label: 'Now Messenger' },
+      { value: 'b', label: 'Agent Chat' },
+      { value: 'c', label: 'Connect Chat' },
+      { value: 'd', label: 'Now Collaboration' },
+      { value: 'e', label: 'Live Feed' }
+    ], correct: ['c'], discussion: 'C is correct. Connect Chat is accessible via the bubble icon in the banner. Note: In newer releases (San Diego+), Connect has been replaced by Sidebar.' },
+
+    { id: 'q69', type: 'single', text: 'Which tab in a Knowledge Base record is used to define users who CANNOT write articles to the knowledge base?', options: [
+      { value: 'a', label: 'Cannot Submit' },
+      { value: 'b', label: 'Cannot Author' },
+      { value: 'c', label: 'Cannot Contribute' },
+      { value: 'd', label: 'Cannot Write' },
+      { value: 'e', label: 'Read Only' }
+    ], correct: ['c'], discussion: 'C is correct. The "Cannot Contribute" tab in the Knowledge Base record defines users who cannot write articles. This tab may need to be added via related list configuration.' },
+
+    { id: 'q70', type: 'multi', text: 'Which features can update multiple records at once? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'List Editor' },
+      { value: 'b', label: 'Field Update Action' },
+      { value: 'c', label: 'Bulk Record Update' },
+      { value: 'd', label: 'Data Repair Dashboard' },
+      { value: 'e', label: 'Update Selected Action' }
+    ], correct: ['a', 'e'], discussion: 'A and E are correct. The List Editor and the Update Selected action (via the "Actions on selected rows" dropdown) can both update multiple records simultaneously.' },
+
+    { id: 'q71', type: 'multi', text: 'By default, which knowledge workers can create and edit Knowledge Base categories? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'Knowledge Author' },
+      { value: 'b', label: 'Knowledge Contributor' },
+      { value: 'c', label: 'Knowledge Controller' },
+      { value: 'd', label: 'Knowledge Manager' },
+      { value: 'e', label: 'Knowledge Category Admin' },
+      { value: 'f', label: 'Knowledge Submitter' },
+      { value: 'g', label: 'Knowledge Owner' },
+      { value: 'h', label: 'Knowledge Taxonomy Owner' }
+    ], correct: ['b', 'd'], discussion: 'B and D are correct. Knowledge Contributors can select and add/edit categories when enabled. Knowledge Managers can define knowledge categories to pre-populate the available category list.' },
+
+    { id: 'q72', type: 'single', text: 'Which collaboration tool opens a sidebar to start a new conversation with other ServiceNow users?', options: [
+      { value: 'a', label: 'Skype Now' },
+      { value: 'b', label: 'Now Collaboration' },
+      { value: 'c', label: 'Agent Messenger' },
+      { value: 'd', label: 'Agent Chat' },
+      { value: 'e', label: 'Connect Chat' }
+    ], correct: ['e'], discussion: 'E is correct. Connect Chat opens a sidebar to start new conversations with other ServiceNow users.' },
+
+    { id: 'q73', type: 'multi', text: 'Which modules can you use to view all fields for the Incident table? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'Tables and Columns' },
+      { value: 'b', label: 'Dictionary' },
+      { value: 'c', label: 'Data Class Manager' },
+      { value: 'd', label: 'Dictionary Dashboard' },
+      { value: 'e', label: 'Database View' },
+      { value: 'f', label: 'Schema' }
+    ], correct: ['a', 'b'], discussion: 'A and B are correct. Both Tables and Columns and the Dictionary module can be used to view all fields for a table.' },
+
+    { id: 'q74', type: 'single', text: 'Which flow component triggers a flow to run after a record has been created or updated?', options: [
+      { value: 'a', label: 'Date-based trigger' },
+      { value: 'b', label: 'Changed trigger' },
+      { value: 'c', label: 'Record-based trigger' },
+      { value: 'd', label: 'Application-based trigger' },
+      { value: 'e', label: 'Updated date trigger' }
+    ], correct: ['c'], discussion: 'C is correct. Record-based triggers start a flow when a record is created or updated.' },
+
+    { id: 'q75', type: 'single', text: 'Which module is used to access available Knowledge Bases?', options: [
+      { value: 'a', label: 'Knowledge > Home' },
+      { value: 'b', label: 'Self-Service > Knowledge' },
+      { value: 'c', label: 'Knowledge > All' },
+      { value: 'd', label: 'Knowledge > Knowledge Bases' },
+      { value: 'e', label: 'Knowledge > Overview' }
+    ], correct: ['b'], discussion: 'B is correct. Self-Service > Knowledge is the module used to access available Knowledge Bases as an end user.' },
+
+    { id: 'q76', type: 'single', text: 'A customer requires: (1) Incident Number to be read-only for all users in all lists and forms; (2) Short Description to be mandatory on insert for all applications. What type of policy would you use?', options: [
+      { value: 'a', label: 'Data Quality Policy' },
+      { value: 'b', label: 'Dictionary Design Policy' },
+      { value: 'c', label: 'UI Data Policy' },
+      { value: 'd', label: 'UI Policy' },
+      { value: 'e', label: 'Field Criteria Policy' },
+      { value: 'f', label: 'Data Policy' }
+    ], correct: ['f'], discussion: 'F is correct. Data Policies apply to all data entering the platform regardless of source (forms, import sets, web services). UI Policies only apply to data entered via forms in a browser.' },
+
+    { id: 'q77', type: 'single', text: 'Which utility is used to import data from various data sources and map it to ServiceNow tables?', options: [
+      { value: 'a', label: 'Transform Set' },
+      { value: 'b', label: 'Data Pack' },
+      { value: 'c', label: 'Update Set' },
+      { value: 'd', label: 'Import Set' }
+    ], correct: ['d'], discussion: 'D is correct. Import Sets is the tool used to import data from various data sources and map it to ServiceNow tables.' },
+
+    { id: 'q78', type: 'single', text: 'When a policy is configured to apply to all data entering the platform (via UI, Import Sets, or Web Services), where does it run by default?', options: [
+      { value: 'a', label: 'Client' },
+      { value: 'b', label: 'Network' },
+      { value: 'c', label: 'Browser' },
+      { value: 'd', label: 'Server' }
+    ], correct: ['d'], discussion: 'D is correct. Data Policies run on the server side, ensuring consistent enforcement regardless of how data enters the platform.' },
+
+    { id: 'q79', type: 'single', text: 'How can you describe the relationship between the Incident table and the Task table?', options: [
+      { value: 'a', label: 'Incident table has a one-to-many relationship with the Task table' },
+      { value: 'b', label: 'Incident table is extended from (derived from) the Task table' },
+      { value: 'c', label: 'Incident table is related to Task table via INC number' },
+      { value: 'd', label: 'Incident table has a many-to-many relationship with the Task table' }
+    ], correct: ['b'], discussion: 'B is correct. The Incident table extends the Task table, meaning it inherits all fields and properties from Task.' },
+
+    { id: 'q80', type: 'single', text: 'Which flow component specifies when a flow should run?', options: [
+      { value: 'a', label: 'Triggers and condition pills' },
+      { value: 'b', label: 'Conditions and tables' },
+      { value: 'c', label: 'Trigger criteria and clock' },
+      { value: 'd', label: 'Triggers and conditions' },
+      { value: 'e', label: 'Scope and trigger conditions' }
+    ], correct: ['d'], discussion: 'D is correct. Triggers and conditions are the flow components that specify when a flow should run.' },
+
+    { id: 'q81', type: 'single', text: 'Which section of Report Designer is used to specify the name of the report and its table or data source?', options: [
+      { value: 'a', label: 'Type' },
+      { value: 'b', label: 'Properties' },
+      { value: 'c', label: 'Configure' },
+      { value: 'd', label: 'Source' },
+      { value: 'e', label: 'Data' }
+    ], correct: ['e'], discussion: 'E is correct. The Data section is the first tab in Report Designer where you specify the report name and data source (table).' },
+
+    { id: 'q82', type: 'single', text: 'To add the "Save" button to the form header in a new Incident record, what do you need to do?', options: [
+      { value: 'a', label: 'Context Menu > Form Design > Add "Save" button' },
+      { value: 'b', label: 'All > System Properties > UI Properties > Enable the "glide.ui.advanced" property' },
+      { value: 'c', label: 'All > System Properties > UI Properties > Enable "Save" button' },
+      { value: 'd', label: 'Context Menu > Form Layout > Add "Save" button' }
+    ], correct: ['c'], discussion: 'C is correct. To show the Save button on forms, go to All > System Properties > UI Properties and enable the "Show Save, Insert, and Insert and Stay buttons on the form" option.' },
+
+    { id: 'q83', type: 'single', text: 'Which feature ensures data integrity when importing data using Import Sets and Web Services?', options: [
+      { value: 'a', label: 'UI Policy' },
+      { value: 'b', label: 'Data Policy' },
+      { value: 'c', label: 'Business Rule' },
+      { value: 'd', label: 'Client Script' },
+      { value: 'e', label: 'CSDM' }
+    ], correct: ['b'], discussion: 'B is correct. Data Policies apply to all data entering the platform, including Import Sets and Web Services, ensuring data integrity.' },
+
+    { id: 'q84', type: 'single', text: 'In Flow Designer, what initiates the execution of a flow?', options: [
+      { value: 'a', label: 'Flow Logic' },
+      { value: 'b', label: 'An existing subflow' },
+      { value: 'c', label: 'An execution data pill' },
+      { value: 'd', label: 'A trigger' }
+    ], correct: ['d'], discussion: 'D is correct. In Flow Designer, a trigger initiates the execution of a flow. Triggers can be record-based, date-based, or application-based.' },
+
+    { id: 'q85', type: 'single', text: 'What is the name of the string that displays filter conditions?', options: [
+      { value: 'a', label: 'Breadcrumb' },
+      { value: 'b', label: 'Selection' },
+      { value: 'c', label: 'Menu' },
+      { value: 'd', label: 'Topic' }
+    ], correct: ['a'], discussion: 'A is correct. In ServiceNow, the breadcrumb is the string that displays the current filter conditions applied to a list.' },
+
+    { id: 'q86', type: 'single', text: 'Which system property is added and set to true to log impersonation events in the system log?', options: [
+      { value: 'a', label: 'glide.sys.all_impersonation' },
+      { value: 'b', label: 'glide.user_setting' },
+      { value: 'c', label: 'glide.sys.log_impersonation' },
+      { value: 'd', label: 'glide.sys.log_impersonation' },
+      { value: 'e', label: 'glide.sys.admin_login' }
+    ], correct: ['d'], discussion: 'D is correct. Set glide.sys.log_impersonation to true to enable logging of impersonation events in the system log.' },
+
+    { id: 'q87', type: 'single', text: 'What is the process that enables users in an organization to create, categorize, review, approve, and view important information in a centralized location?', options: [
+      { value: 'a', label: 'Self-Service Administration' },
+      { value: 'b', label: 'Knowledge Management' },
+      { value: 'c', label: 'Business Information Management' },
+      { value: 'd', label: 'Information Portal Administration' },
+      { value: 'e', label: 'Knowledge-Centered Administration' }
+    ], correct: ['b'], discussion: 'B is correct. Knowledge Management enables organizations to create, categorize, review, approve, and view important information in a centralized shared location.' },
+
+    { id: 'q88', type: 'single', text: 'A colleague wants to rearrange the columns in their My Work list. After navigating to the list, where should they go to select and arrange the columns?', options: [
+      { value: 'a', label: 'Right-click any column header, then Context Menu > Configure > List Layout' },
+      { value: 'b', label: 'Click the list context menu > Configure > List Layout' },
+      { value: 'c', label: 'Click the list context menu > Personalize List' },
+      { value: 'd', label: 'Click Personalize List' }
+    ], correct: ['d'], discussion: 'D is correct. To personalize your own list view (not change it for everyone), click the gear icon (labeled "Personalize list") in the list header to select and arrange columns.' },
+
+    { id: 'q89', type: 'single', text: 'You are viewing a list of active incidents and want to exclude incidents with a "Resolved" state. What should you do?', options: [
+      { value: 'a', label: 'In the search, select State and type "not Resolved" then press Enter' },
+      { value: 'b', label: 'Right-click the State column title and select Exclude Filter > Resolved' },
+      { value: 'c', label: 'Right-click the "Resolved" value in the record list and select "Exclude"' },
+      { value: 'd', label: 'Right-click the "Resolved" value in the record list and select "Filter Out"' }
+    ], correct: ['c'], discussion: 'C is correct. Right-clicking a value in the list and selecting "Exclude" will add an exclusion filter for that value.' },
+
+    { id: 'q90', type: 'single', text: 'Which role inherits all permissions from the catalog role and user_criteria_admin role, and also has permission to create items and services?', options: [
+      { value: 'a', label: 'System Administrator [sys_admin]' },
+      { value: 'b', label: 'Catalog Admin [catalog_admin]' },
+      { value: 'c', label: 'Catalog Writer [sn_catalog_write]' },
+      { value: 'd', label: 'Item Admin [sn_item_admin]' }
+    ], correct: ['b'], discussion: 'B is correct. The catalog_admin role inherits from both the catalog and user_criteria_admin roles and also has permission to create items and services.' },
+
+    { id: 'q91', type: 'single', text: 'Which component of the ServiceNow infrastructure defines all tables and fields in the system?', options: [
+      { value: 'a', label: 'Schema' },
+      { value: 'b', label: 'Field Map' },
+      { value: 'c', label: 'Table Class Manager' },
+      { value: 'd', label: 'Dictionary' },
+      { value: 'e', label: 'Data Atlas' }
+    ], correct: ['d'], discussion: 'D is correct. The Dictionary defines all tables and fields in the ServiceNow platform.' },
+
+    { id: 'q92', type: 'multi', text: 'Which data integrity settings can be achieved using UI Policies? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'Set a field to accept data in an expected format' },
+      { value: 'b', label: 'Set a field to accept data of n number of characters' },
+      { value: 'c', label: 'Set a field to hidden' },
+      { value: 'd', label: 'Set a field to read-only' },
+      { value: 'e', label: 'Set a field to mandatory' }
+    ], correct: ['c', 'd', 'e'], discussion: 'C, D, and E are correct. UI Policies can set fields to hidden, read-only, or mandatory. They do not control data format or character limits (those are dictionary attributes).' },
+
+    { id: 'q93', type: 'single', text: 'A customer wants to validate on a form that a submission is valid using a client script. Which client script would you recommend?', options: [
+      { value: 'a', label: 'onSubmit()' },
+      { value: 'b', label: 'onSubmission()' },
+      { value: 'c', label: 'onUpdate()' },
+      { value: 'd', label: 'onLoad()' }
+    ], correct: ['a'], discussion: 'A is correct. onSubmit() is the client script type used to validate data before the form is submitted. onSubmission() does not exist.' },
+
+    { id: 'q94', type: 'multi', text: 'An order was placed from the Service Catalog. Two records are created as a result. Which two records are associated with this new order item? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'A record in the sc_req_item table' },
+      { value: 'b', label: 'An sc_task record' },
+      { value: 'c', label: 'An Incident record' },
+      { value: 'd', label: 'A Change record' },
+      { value: 'e', label: 'A Problem record' }
+    ], correct: ['a', 'b'], discussion: 'A and B are correct. When a catalog item is ordered, an RITM (sc_req_item) is created, and SCTASK (sc_task) records may be created by the workflow.' },
+
+    { id: 'q95', type: 'single', text: 'To customize the column layout in a list, which action do you perform?', options: [
+      { value: 'a', label: 'Context Menu > View > Customize' },
+      { value: 'b', label: 'Click gear icon > Personalize window options > Select appropriate columns' },
+      { value: 'c', label: 'Select a column to customize and choose the customize option on the right side of the header' },
+      { value: 'd', label: 'Select a column, click the edit icon (pencil), and choose the customize option' }
+    ], correct: ['b'], discussion: 'B is correct. Click the gear icon (Personalize List) in the list header to select and arrange the columns you want to display.' },
+
+    { id: 'q96', type: 'single', text: 'After placing a new office equipment order through the Service Catalog, how do you view the list of requests?', options: [
+      { value: 'a', label: 'All > Tables and Columns > Task' },
+      { value: 'b', label: 'Type "requests.list" in the navigation filter and press Enter' },
+      { value: 'c', label: 'All > Service Catalog > Requests' },
+      { value: 'd', label: 'All > Service Catalog > Open Records > Items' }
+    ], correct: ['d'], discussion: 'D is correct. To view the list of orders/requests: All > Service Catalog > Open Records > Items. This shows RITM records with associated REQ values.' },
+
+    { id: 'q97', type: 'single', text: 'To access the table configuration page from a form, which path do you select?', options: [
+      { value: 'a', label: 'Form Context Menu > View > Show Table' },
+      { value: 'b', label: 'Form Context Menu > View > Table' },
+      { value: 'c', label: 'Form Context Menu > Configure > Dictionary' },
+      { value: 'd', label: 'Form Context Menu > Configure > Table' }
+    ], correct: ['d'], discussion: 'D is correct. Navigate to Form Context Menu > Configure > Table to access the table configuration page.' },
+
+    { id: 'q98', type: 'single', text: 'Which admin role is required to change high-security settings?', options: [
+      { value: 'a', label: 'high_sec_admin' },
+      { value: 'b', label: 'sn_acl_admin' },
+      { value: 'c', label: 'admin' },
+      { value: 'd', label: 'security_admin' }
+    ], correct: ['d'], discussion: 'D is correct. The security_admin role is required to change high-security settings (ACL modifications).' },
+
+    { id: 'q99', type: 'single', text: 'What is the most common role that provides access to almost all features, functions, and data in the platform?', options: [
+      { value: 'a', label: 'Super User [sn_super_user]' },
+      { value: 'b', label: 'Security Admin [security_admin]' },
+      { value: 'c', label: 'System Administrator [admin]' },
+      { value: 'd', label: 'Base Admin [base_admin]' },
+      { value: 'e', label: 'System Manager [sys_manager]' }
+    ], correct: ['c'], discussion: 'C is correct. The System Administrator [admin] role provides access to almost all features, functions, and data in the platform.' },
+
+    { id: 'q100', type: 'single', text: 'To move multiple update sets at once, what do you do to facilitate the move?', options: [
+      { value: 'a', label: 'Preview' },
+      { value: 'b', label: 'Batch' },
+      { value: 'c', label: 'List' },
+      { value: 'd', label: 'Map' }
+    ], correct: ['b'], discussion: 'B is correct. Batch update sets allow you to group multiple update sets so they can be previewed and committed together as a single unit.' },
+
+    { id: 'q101', type: 'single', text: 'After making changes to a report, where do you click to check the results without saving?', options: [
+      { value: 'a', label: 'Preview' },
+      { value: 'b', label: 'Test' },
+      { value: 'c', label: 'Run' },
+      { value: 'd', label: 'Try it' },
+      { value: 'e', label: 'Execute' }
+    ], correct: ['c'], discussion: 'C is correct. Click "Run" to execute the report and see results based on current settings without saving.' },
+
+    { id: 'q102', type: 'single', text: 'Which framework can automatically populate the "Priority" and "Category" fields based on the value in the "Short Description" field?', options: [
+      { value: 'a', label: 'Predictive Intelligence' },
+      { value: 'b', label: 'Assignment Rules' },
+      { value: 'c', label: 'CSDM' },
+      { value: 'd', label: 'Actions' },
+      { value: 'e', label: 'UI Policies' }
+    ], correct: ['a'], discussion: 'A is correct. Predictive Intelligence uses machine learning algorithms to automatically populate field values (like Priority and Category) based on text input like Short Description.' },
+
+    { id: 'q103', type: 'single', text: 'Which testing framework is used to test ServiceNow applications?', options: [
+      { value: 'a', label: 'Test Driven Framework (TDF)' },
+      { value: 'b', label: 'Junit' },
+      { value: 'c', label: 'Selenium' },
+      { value: 'd', label: 'Automated Test Framework (ATF)' }
+    ], correct: ['d'], discussion: 'D is correct. The Automated Test Framework (ATF) is ServiceNow\'s built-in testing framework for testing applications.' },
+
+    { id: 'q104', type: 'single', text: 'Which can create task-based records from the Service Catalog?', options: [
+      { value: 'a', label: 'Assignment Rules' },
+      { value: 'b', label: 'Flow Designer' },
+      { value: 'c', label: 'UI Builder' },
+      { value: 'd', label: 'Record Producer' }
+    ], correct: ['d'], discussion: 'D is correct. Record Producers allow creating task-based records (Incidents, Changes, etc.) from the Service Catalog interface.' },
+
+    { id: 'q105', type: 'single', text: 'Which module is used to access available reports?', options: [
+      { value: 'a', label: 'Self-Service > My Reports' },
+      { value: 'b', label: 'Self-Service > My Dashboards' },
+      { value: 'c', label: 'Reports > View / Run' },
+      { value: 'd', label: 'Reports > Homepage' },
+      { value: 'e', label: 'Reports > Overview' }
+    ], correct: ['c'], discussion: 'C is correct. Reports > View/Run is the module used to access available reports.' },
+
+    { id: 'q106', type: 'single', text: 'Security rules that restrict what data users can view and interact with are called what?', options: [
+      { value: 'a', label: 'CRUD Rules' },
+      { value: 'b', label: 'Access Control Rules' },
+      { value: 'c', label: 'Role Assignment Rules' },
+      { value: 'd', label: 'Scripted User Rules' },
+      { value: 'e', label: 'User Authentication Rules' }
+    ], correct: ['b'], discussion: 'B is correct. Access Control Rules (ACL Rules) restrict what data users can view and interact with in ServiceNow.' },
+
+    { id: 'q107', type: 'multi', text: 'A new IT employee needs to perform work assigned to the Network and Hardware groups. How do you configure access? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'Add the user account to the Hardware group' },
+      { value: 'b', label: 'Add the user account to the IT Knowledge Base' },
+      { value: 'c', label: 'Create a user account' },
+      { value: 'd', label: 'Add the user account to the ITIL group' },
+      { value: 'e', label: 'Add the user account to the Network group' },
+      { value: 'f', label: 'Add the user account to an ACL' }
+    ], correct: ['a', 'c', 'e'], discussion: 'A, C, and E are correct. Create a user account, then add the user to the Network group and the Hardware group. Roles should be inherited through group membership.' },
+
+    { id: 'q108', type: 'single', text: 'What is specified in an Access Control Rule?', options: [
+      { value: 'a', label: 'Groups, condition expressions, and workflows' },
+      { value: 'b', label: 'Table schema, CRUD, and user authentication' },
+      { value: 'c', label: 'The object and operation being protected; the permissions required to access the object' },
+      { value: 'd', label: 'security_admin' }
+    ], correct: ['c'], discussion: 'C is correct. Each ACL rule specifies: the object and operation being protected, and the permissions required to access that object.' },
+
+    { id: 'q109', type: 'single', text: 'Which icon do you double-click to expand and collapse the full list of applications and modules?', options: [
+      { value: 'a', label: 'Star' },
+      { value: 'b', label: 'Clock' },
+      { value: 'c', label: 'Application' },
+      { value: 'd', label: 'Funnel' }
+    ], correct: ['c'], discussion: 'C is correct. Double-clicking the Application icon expands and collapses all application menus in the navigator.' },
+
+    { id: 'q110', type: 'single', text: 'What are the components that need to be managed to deliver a service called?', options: [
+      { value: 'a', label: 'CSDM Items' },
+      { value: 'b', label: 'CMDB' },
+      { value: 'c', label: 'Configuration Items' },
+      { value: 'd', label: 'Service Offerings' },
+      { value: 'e', label: 'Assets' }
+    ], correct: ['c'], discussion: 'C is correct. Configuration Items (CIs) are the components that need to be managed in order to deliver an IT service — this is the ITIL definition.' },
+
+    { id: 'q111', type: 'multi', text: 'What are the three security modules commonly used by system administrators? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'System Properties > Security' },
+      { value: 'b', label: 'Utilities > Security Migration' },
+      { value: 'c', label: 'System Security > Security' },
+      { value: 'd', label: 'Self-Service > My Access' },
+      { value: 'e', label: 'System Security > Access Control (ACL)' },
+      { value: 'f', label: 'Password Management > Security Questions' },
+      { value: 'g', label: 'System Security > High Security Settings' }
+    ], correct: ['a', 'e', 'g'], discussion: 'A, E, and G are correct. The three commonly used security modules are: System Properties > Security, System Security > Access Control (ACL), and System Security > High Security Settings.' },
+
+    { id: 'q112', type: 'multi', text: 'When testing a catalog item that has a manager approval flow, which best practices should you follow? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'Ensure the latest flow is activated' },
+      { value: 'b', label: 'Use instance incognito mode to quickly switch between requester and approver' },
+      { value: 'c', label: 'Impersonate the requester to verify the form works correctly' },
+      { value: 'd', label: 'Ensure a manager is specified on the requester\'s user record' },
+      { value: 'e', label: 'Create and select a test update set before starting the test case' },
+      { value: 'f', label: 'Use admin account to approve items quickly' }
+    ], correct: ['a', 'c', 'd'], discussion: 'A, C, and D are correct. Best practices: (A) Activate the latest flow version, (C) Impersonate the requester to test from user perspective, (D) Ensure manager is set on the requester\'s user record for approval routing.' },
+
+    { id: 'q113', type: 'single', text: 'What is the no-code method to control whether form fields are mandatory or read-only?', options: [
+      { value: 'a', label: 'UI Actions' },
+      { value: 'b', label: 'Client Scripts' },
+      { value: 'c', label: 'UI Scripts' },
+      { value: 'd', label: 'UI Rules' },
+      { value: 'e', label: 'UI Policies' }
+    ], correct: ['e'], discussion: 'E is correct. UI Policies are the no-code method to control field visibility, mandatory status, and read-only status on forms.' },
+
+    { id: 'q114', type: 'single', text: 'To move multiple update sets at once, what do you use to facilitate the move?', options: [
+      { value: 'a', label: 'Batch' },
+      { value: 'b', label: 'Validate' },
+      { value: 'c', label: 'Test' },
+      { value: 'd', label: 'Preview' }
+    ], correct: ['a'], discussion: 'A is correct. Batch update sets allow you to group multiple update sets together so they can be previewed and committed at once.' },
+
+    { id: 'q115', type: 'single', text: 'What is the section in Report Designer used to specify groupings and calculations on data?', options: [
+      { value: 'a', label: 'Style' },
+      { value: 'b', label: 'Grouping' },
+      { value: 'c', label: 'Configure' },
+      { value: 'd', label: 'Formatting' },
+      { value: 'e', label: 'Data' }
+    ], correct: ['c'], discussion: 'C is correct. The Configure section in Report Designer is where you specify groupings and calculations (aggregations).' },
+
+    { id: 'q116', type: 'single', text: 'Which module would you use to create new reports on approvals, tasks, and notifications?', options: [
+      { value: 'a', label: 'Process Automation > Flow Designer' },
+      { value: 'b', label: 'Process Automation > Flow Management' },
+      { value: 'c', label: 'Process Automation > Workflow Editor' },
+      { value: 'd', label: 'Process Automation > Process Flows' }
+    ], correct: ['a'], discussion: 'A is correct. Flow Designer is used to create new automation for approvals, tasks, and notifications.' },
+
+    { id: 'q117', type: 'single', text: 'Which module is used to access available reports in ServiceNow?', options: [
+      { value: 'a', label: 'Self Service > My Reports' },
+      { value: 'b', label: 'Reports > Getting Started' },
+      { value: 'c', label: 'Performance Analytics > Reports' },
+      { value: 'd', label: 'Self-Service > Reports' },
+      { value: 'e', label: 'Reports > View/Run' }
+    ], correct: ['e'], discussion: 'E is correct. Reports > View/Run lists all available reports and allows creation of new ones.' },
+
+    { id: 'q118', type: 'single', text: 'What is the process to apply an update set to an instance?', options: [
+      { value: 'a', label: 'Retrieve, Preview, Commit' },
+      { value: 'b', label: 'Specify, Transform, Apply' },
+      { value: 'c', label: 'Retrieve, Evaluate, Apply' },
+      { value: 'd', label: 'Retrieve, Test, Push' },
+      { value: 'e', label: 'Pull, Review, Push' }
+    ], correct: ['a'], discussion: 'A is correct. The update set application process: Retrieve (import from source), Preview (check conflicts), Commit (apply changes).' },
+
+    { id: 'q119', type: 'single', text: 'In which step of the spreadsheet data import process is data written to the receiving table?', options: [
+      { value: 'a', label: 'Run Transform' },
+      { value: 'b', label: 'Run Import' },
+      { value: 'c', label: 'Import Data Set' },
+      { value: 'd', label: 'Execute Transform' },
+      { value: 'e', label: 'Schedule Transform' }
+    ], correct: ['a'], discussion: 'A is correct. "Run Transform" is the step that moves data from the import set (staging) table to the target (receiving) table.' },
+
+    { id: 'q120', type: 'multi', text: 'How can you group records in a list by the "Category" column? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'In the list context menu, select Group By > Category' },
+      { value: 'b', label: 'In the Filter menu, select Group By > Category' },
+      { value: 'c', label: 'Click the group icon and select Category' },
+      { value: 'd', label: 'Type "tablename.group.category" in the navigator filter' },
+      { value: 'e', label: 'Right-click the Category column title and select Group By Category' }
+    ], correct: ['a', 'e'], discussion: 'A and E are correct. You can group by using the list context menu or right-clicking the column header to select Group By.' },
+
+    { id: 'q121', type: 'single', text: 'From the banner, which collaboration tool is available via the bubble icon?', options: [
+      { value: 'a', label: 'Now Messenger' },
+      { value: 'b', label: 'Agent Chat' },
+      { value: 'c', label: 'Connect Chat' },
+      { value: 'd', label: 'Now Collaboration' },
+      { value: 'e', label: 'Live Feed' }
+    ], correct: ['c'], discussion: 'C is correct. Connect Chat is available via the bubble icon in the banner.' },
+
+    { id: 'q122', type: 'single', text: 'Which tab in a Knowledge Base record is used to define users who CANNOT write articles to the knowledge base?', options: [
+      { value: 'a', label: 'Cannot Submit' },
+      { value: 'b', label: 'Cannot Author' },
+      { value: 'c', label: 'Cannot Contribute' },
+      { value: 'd', label: 'Cannot Write' },
+      { value: 'e', label: 'Read Only' }
+    ], correct: ['c'], discussion: 'C is correct. The "Cannot Contribute" tab defines users who cannot author articles in the knowledge base.' },
+
+    { id: 'q123', type: 'multi', text: 'Which features allow updating multiple records at once? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'List Editor' },
+      { value: 'b', label: 'Field Update Action' },
+      { value: 'c', label: 'Bulk Record Update' },
+      { value: 'd', label: 'Data Repair Dashboard' },
+      { value: 'e', label: 'Update Selected Action' }
+    ], correct: ['a', 'e'], discussion: 'A and E are correct. The List Editor and Update Selected action both support updating multiple records simultaneously.' },
+
+    { id: 'q124', type: 'multi', text: 'By default, which knowledge workers can create and edit Knowledge Base categories? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'Knowledge Author' },
+      { value: 'b', label: 'Knowledge Contributor' },
+      { value: 'c', label: 'Knowledge Controller' },
+      { value: 'd', label: 'Knowledge Manager' },
+      { value: 'e', label: 'Knowledge Category Admin' }
+    ], correct: ['b', 'd'], discussion: 'B and D are correct. Knowledge Contributors can add/edit categories; Knowledge Managers can define available categories.' },
+
+    { id: 'q125', type: 'single', text: 'Which collaboration tool opens a sidebar to start new conversations with other ServiceNow users?', options: [
+      { value: 'a', label: 'Skype Now' },
+      { value: 'b', label: 'Now Collaboration' },
+      { value: 'c', label: 'Agent Messenger' },
+      { value: 'd', label: 'Agent Chat' },
+      { value: 'e', label: 'Connect Chat' }
+    ], correct: ['e'], discussion: 'E is correct. Connect Chat opens the sidebar for conversations with other ServiceNow users.' },
+
+    { id: 'q126', type: 'multi', text: 'Which modules can display all fields for the Incident table? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'Tables and Columns' },
+      { value: 'b', label: 'Dictionary' },
+      { value: 'c', label: 'Data Class Manager' },
+      { value: 'd', label: 'Dictionary Dashboard' },
+      { value: 'e', label: 'Database View' },
+      { value: 'f', label: 'Schema' }
+    ], correct: ['a', 'b'], discussion: 'A and B are correct. Tables and Columns and the Dictionary module can both display all fields for a table.' },
+
+    { id: 'q127', type: 'single', text: 'Which flow component triggers a flow after a record has been created or updated?', options: [
+      { value: 'a', label: 'Date-based trigger' },
+      { value: 'b', label: 'Changed trigger' },
+      { value: 'c', label: 'Record-based trigger' },
+      { value: 'd', label: 'Application-based trigger' }
+    ], correct: ['c'], discussion: 'C is correct. Record-based triggers fire when a record is created or updated.' },
+
+    { id: 'q128', type: 'single', text: 'Which type of field is Boolean and displays as a checkbox?', options: [
+      { value: 'a', label: 'Yes/No' },
+      { value: 'b', label: 'True/False' },
+      { value: 'c', label: 'On/Off' },
+      { value: 'd', label: 'Binary' }
+    ], correct: ['b'], discussion: 'B is correct. The True/False field type is Boolean and displays as a checkbox.' },
+
+    { id: 'q129', type: 'single', text: 'What is the primary difference between Performance Analytics and Reports?', options: [
+      { value: 'a', label: 'Performance Analytics includes snapshots of data over time; Reports show data only at the time the report is run' },
+      { value: 'b', label: 'Performance Analytics can show trends but Reports cannot' },
+      { value: 'c', label: 'Reports can be scheduled but Performance Analytics cannot' },
+      { value: 'd', label: 'Performance Analytics can be published to dashboards but Reports cannot' }
+    ], correct: ['a'], discussion: 'A is correct. Performance Analytics captures periodic data snapshots to generate accurate historical trends, while Reports show a point-in-time view.' },
+
+    { id: 'q130', type: 'single', text: 'A customer wants to change Priority field labels from "1-Critical" to "P1, P2, P3, P4" for all tasks. After right-clicking the Priority field, what do you select?', options: [
+      { value: 'a', label: 'Configure List' },
+      { value: 'b', label: 'Show Options' },
+      { value: 'c', label: 'Configure Tasks' },
+      { value: 'd', label: 'Show Choices' },
+      { value: 'e', label: 'Show Choice List' },
+      { value: 'f', label: 'Configure Options' }
+    ], correct: ['e'], discussion: 'E is correct. Right-clicking the Priority field and selecting "Show Choice List" opens the list of defined choices where you can edit the labels.' },
+
+    { id: 'q131', type: 'single', text: 'When designing a flow, how do you reference data from a record within the flow?', options: [
+      { value: 'a', label: 'Drag the table icon into the flow definition' },
+      { value: 'b', label: 'Use the condition builder to specify the required values' },
+      { value: 'c', label: 'Specify the source table in the data pill related list' },
+      { value: 'd', label: 'Drag a data pill into the flow definition' },
+      { value: 'e', label: 'Use the slash bucket to add a table reference' }
+    ], correct: ['d'], discussion: 'D is correct. Data pills are dragged into the flow definition to reference data from records.' },
+
+    { id: 'q132', type: 'multi', text: 'In the Report page, which sections show reports for different user audiences? (Choose 4)', requiredCount: 4, options: [
+      { value: 'a', label: 'Group' },
+      { value: 'b', label: 'Department' },
+      { value: 'c', label: 'My Reports' },
+      { value: 'd', label: 'Team' },
+      { value: 'e', label: 'Dashboard' },
+      { value: 'f', label: 'Global' },
+      { value: 'g', label: 'Administration' },
+      { value: 'h', label: 'Analytics' },
+      { value: 'i', label: 'All' },
+      { value: 'j', label: 'Company' }
+    ], correct: ['a', 'c', 'f', 'i'], discussion: 'A, C, F, and I are correct. The Reports > View/Run page has four sections: My Reports, Group, Global, and All.' },
+
+    { id: 'q133', type: 'single', text: 'Which tool is used to define the field relationship between an import set table and a target table?', options: [
+      { value: 'a', label: 'Transform Schema' },
+      { value: 'b', label: 'Schema Map' },
+      { value: 'c', label: 'Dictionary Map' },
+      { value: 'd', label: 'Transform Map' },
+      { value: 'e', label: 'Field Transform Tool' },
+      { value: 'f', label: 'Import Designer' }
+    ], correct: ['d'], discussion: 'D is correct. A Transform Map defines the field relationships between the import set (staging) table and the target table.' },
+
+    { id: 'q134', type: 'single', text: 'Which ServiceNow feature helps users get information, make decisions, and complete common work tasks through a messaging interface?', options: [
+      { value: 'a', label: 'Agent Workspace' },
+      { value: 'b', label: 'Chatbot' },
+      { value: 'c', label: 'Virtual Agent' },
+      { value: 'd', label: 'Knowledge Chat' },
+      { value: 'e', label: 'Now Support' }
+    ], correct: ['c'], discussion: 'C is correct. Virtual Agent is a conversational platform that helps users get information, make decisions, and perform common tasks through a messaging interface.' },
+
+    { id: 'q135', type: 'single', text: 'Which feature can automate business logic (approvals, task notifications, record operations) for specific applications or processes?', options: [
+      { value: 'a', label: 'Flows' },
+      { value: 'b', label: 'Action Sequences' },
+      { value: 'c', label: 'Action Sets' },
+      { value: 'd', label: 'Task Flows' },
+      { value: 'e', label: 'Flow Diagrams' }
+    ], correct: ['a'], discussion: 'A is correct. Flows (in Flow Designer) automate business logic including approvals, notifications, and record operations.' },
+
+    { id: 'q136', type: 'multi', text: 'From a form, where can you click to add additional fields? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'Context Menu > Form > Layout' },
+      { value: 'b', label: 'Context Menu > Configure > Form Layout' },
+      { value: 'c', label: 'Context Menu > Configure > Form Design' },
+      { value: 'd', label: 'Right-click header > Add > Field' },
+      { value: 'e', label: 'Context Menu > Form > Designer' },
+      { value: 'f', label: 'Right-click header > Configure > UX Dashboard' }
+    ], correct: ['b', 'c'], discussion: 'B and C are correct. Additional fields can be added via Context Menu > Configure > Form Layout or Configure > Form Design.' },
+
+    { id: 'q137', type: 'single', text: 'Which module is used to customize the banner image, text, and colors of the platform?', options: [
+      { value: 'a', label: 'System UI > UI Pages > Branding' },
+      { value: 'b', label: 'Service Portal > Portals > Branding' },
+      { value: 'c', label: 'System Properties > Basic Configuration UI16' },
+      { value: 'd', label: 'System Properties > Branding' },
+      { value: 'e', label: 'Homepage Administration > Pages > Branding' }
+    ], correct: ['c'], discussion: 'C is correct. System Properties > Basic Configuration UI16 is used to customize the banner image, text, and colors.' },
+
+    { id: 'q138', type: 'single', text: 'Which database provides a logical model of enterprise infrastructure by identifying, controlling, maintaining, and verifying CIs?', options: [
+      { value: 'a', label: 'IMDB' },
+      { value: 'b', label: 'ITSM' },
+      { value: 'c', label: 'CSDM' },
+      { value: 'd', label: 'CMDB' },
+      { value: 'e', label: 'LDAP' }
+    ], correct: ['d'], discussion: 'D is correct. The CMDB (Configuration Management Database) provides a logical model of enterprise infrastructure.' },
+
+    { id: 'q139', type: 'single', text: 'Which module is used as the first step in the data import process?', options: [
+      { value: 'a', label: 'Data Integration' },
+      { value: 'b', label: 'Data Transform' },
+      { value: 'c', label: 'Data Import' },
+      { value: 'd', label: 'Load Data' }
+    ], correct: ['d'], discussion: 'D is correct. "Load Data" is the first step in the import process, staging the data in an import set table.' },
+
+    { id: 'q140', type: 'single', text: 'When there is little technical knowledge available, which utility would you use to orchestrate business processes across services?', options: [
+      { value: 'a', label: 'Flow Manager' },
+      { value: 'b', label: 'Flow Designer' },
+      { value: 'c', label: 'Flow Editor' },
+      { value: 'd', label: 'Workflow Editor' },
+      { value: 'e', label: 'Workflow Designer' }
+    ], correct: ['b'], discussion: 'B is correct. Flow Designer provides a low-code interface suitable for users with limited technical knowledge to orchestrate business processes.' },
+
+    { id: 'q141', type: 'single', text: 'When a user reports that a module does not appear in the Application Navigator, how do you check what modules that user sees?', options: [
+      { value: 'a', label: 'Check the user\'s password and log in with their account' },
+      { value: 'b', label: 'Start a Connect Chat session' },
+      { value: 'c', label: 'Install the Bomgar plugin' },
+      { value: 'd', label: 'Impersonate the user' },
+      { value: 'e', label: 'Launch a NowChat window' }
+    ], correct: ['d'], discussion: 'D is correct. Impersonating the user allows you to see exactly what they see in the platform.' },
+
+    { id: 'q142', type: 'single', text: 'What is the primary difference between Performance Analytics and Reporting?', options: [
+      { value: 'a', label: 'Performance Analytics contains snapshots of data over time; Reports show current data only' },
+      { value: 'b', label: 'Performance Analytics can show trends; Reports cannot' },
+      { value: 'c', label: 'Reports can be scheduled; Performance Analytics cannot' },
+      { value: 'd', label: 'Performance Analytics KPIs can be shown; Reports cannot show KPIs' }
+    ], correct: ['a'], discussion: 'A is correct. Performance Analytics captures historical snapshots over time; reports show current/real-time data.' },
+
+    { id: 'q143', type: 'single', text: 'Which steps are used to import data using Import Sets? (Correct order)', options: [
+      { value: 'a', label: 'Select source file; run auto-mapping; transform data; clean up target table' },
+      { value: 'b', label: 'Identify source; import transform map; run transformer; validate import' },
+      { value: 'c', label: 'Configure LDAP; test map; create update set; run import; apply update set' },
+      { value: 'd', label: 'Load data; create transform map; transform data; clean up import table' }
+    ], correct: ['d'], discussion: 'D is correct. The import set process: Load Data (stage data) > Create Transform Map (define field mappings) > Transform Data (move to target table) > Clean up import table.' },
+
+    { id: 'q144', type: 'single', text: 'Which type of script runs in the browser?', options: [
+      { value: 'a', label: 'Script Include scripts' },
+      { value: 'b', label: 'Access Control scripts' },
+      { value: 'c', label: 'Business Rule scripts' },
+      { value: 'd', label: 'UI Policies and Client Scripts' }
+    ], correct: ['d'], discussion: 'D is correct. UI Policies and Client Scripts are client-side scripts that run in the browser.' },
+
+    { id: 'q145', type: 'multi', text: 'Which two modules can you use to create a new table? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'Dictionary' },
+      { value: 'b', label: 'Schema Map' },
+      { value: 'c', label: 'Tables' },
+      { value: 'd', label: 'Tables and Columns' }
+    ], correct: ['c', 'd'], discussion: 'C and D are correct. New tables can be created from the Tables module or the Tables and Columns module.' },
+
+    { id: 'q146', type: 'single', text: 'Which of the following describes the primary operations on tables in the ServiceNow platform?', options: [
+      { value: 'a', label: 'Create, Read, Upload, Delete' },
+      { value: 'b', label: 'Capture, Evaluate, Write, Develop' },
+      { value: 'c', label: 'Create, Evaluate, Update, Delete' },
+      { value: 'd', label: 'Create, Read, Write, Delete' }
+    ], correct: ['d'], discussion: 'D is correct. In ServiceNow, the operations are Create, Read, Write (not Update), Delete — sometimes called CRWD. "Write" is used instead of "Update" in the ACL context.' },
+
+    { id: 'q147', type: 'single', text: 'How is a user defined in ServiceNow?', options: [
+      { value: 'a', label: 'A user is a record stored in the [sys_user_profile] profile table' },
+      { value: 'b', label: 'A user is a record stored in the User [sys_user] table' },
+      { value: 'c', label: 'A user is a record stored in the User Preference [sys_user_preference] table' },
+      { value: 'd', label: 'A user is a field in an LDAP integration' }
+    ], correct: ['b'], discussion: 'B is correct. Users in ServiceNow are records stored in the User [sys_user] table.' },
+
+    { id: 'q148', type: 'single', text: 'Which ServiceNow utility provides a service desk agent with the ability to track which CIs supporting a service have active problems?', options: [
+      { value: 'a', label: 'CI Dependency View' },
+      { value: 'b', label: 'Event Management Homepage' },
+      { value: 'c', label: 'Service Dashboard' },
+      { value: 'd', label: 'CI Health Dashboard' }
+    ], correct: ['a'], discussion: 'A is correct. The CI Dependency View allows service desk agents to track which CIs supporting a service have active problems.' },
+
+    { id: 'q149', type: 'single', text: 'To use Flow Designer to reference record data within a flow, how do you do it?', options: [
+      { value: 'a', label: 'Drag the table icon into the flow definition' },
+      { value: 'b', label: 'Use the condition builder' },
+      { value: 'c', label: 'Specify the source table in the data pill' },
+      { value: 'd', label: 'Drag a data pill into the flow definition' }
+    ], correct: ['d'], discussion: 'D is correct. Data pills are dragged into the flow definition to reference specific record data.' },
+
+    { id: 'q150', type: 'single', text: 'Which instance resource provides access to guided tours, information about actions, and instructions on using inputs and outputs in a flow?', options: [
+      { value: 'a', label: 'Documentation' },
+      { value: 'b', label: 'Community' },
+      { value: 'c', label: 'Help Panel (question mark icon)' },
+      { value: 'd', label: 'Wiki' }
+    ], correct: ['c'], discussion: 'C is correct. The Help Panel (question mark icon) provides guided tours, action information, and instructions on using inputs and outputs within flows.' },
+
+    { id: 'q151', type: 'single', text: 'What are the four benefits of assigning work tasks to a group rather than an individual? (Choose 4)', requiredCount: 4, options: [
+      { value: 'a', label: 'Group members can select their own tasks from "My Group\'s Work"' },
+      { value: 'b', label: 'Groups can assign tasks to users based on on-call schedules' },
+      { value: 'c', label: 'Site support members can select tasks based on location' },
+      { value: 'd', label: 'Groups can assign tasks to users based on skills' },
+      { value: 'e', label: 'Group members can avoid tasks with approaching SLA breaches' },
+      { value: 'f', label: 'Groups can assign tasks to users based on availability' }
+    ], correct: ['a', 'b', 'd', 'f'], discussion: 'A, B, D, and F are correct. Benefits of group assignment: members can select from My Group\'s Work, tasks can be assigned based on on-call schedules, skills, and availability.' },
+
+    { id: 'q152', type: 'single', text: 'Which ServiceNow feature allows you to include data from secondary related tables in a report?', options: [
+      { value: 'a', label: 'SQL' },
+      { value: 'b', label: 'Dot-walking' },
+      { value: 'c', label: 'Outer Join' },
+      { value: 'd', label: 'Join' }
+    ], correct: ['b'], discussion: 'B is correct. Dot-walking allows you to traverse reference fields to access data from related tables in reports and other contexts.' },
+
+    { id: 'q153', type: 'single', text: 'Which attributes can be managed using System Properties > Basic Configuration UI16? (Choose 5)', requiredCount: 5, options: [
+      { value: 'a', label: 'Browser tab title' },
+      { value: 'b', label: 'Module text color' },
+      { value: 'c', label: 'Recommended browser' },
+      { value: 'd', label: 'Base theme' },
+      { value: 'e', label: 'Font style' },
+      { value: 'f', label: 'Animation style' },
+      { value: 'g', label: 'Header background color' },
+      { value: 'h', label: 'Banner image' }
+    ], correct: ['a', 'd', 'f', 'g', 'h'], discussion: 'A, D, F, G, and H are correct. UI16 Basic Configuration manages: Browser tab title, Base theme, Animation style, Header background color, and Banner image.' },
+
+    { id: 'q154', type: 'single', text: 'A service catalog option is needed so users can click "Get Help" and describe their issue, which then creates an Incident and routes it to the service desk. Which method should you use?', options: [
+      { value: 'a', label: 'Record Producer' },
+      { value: 'b', label: 'Create a Catalog Item' },
+      { value: 'c', label: 'Create an Order Guide' },
+      { value: 'd', label: 'Create a Content Item' }
+    ], correct: ['a'], discussion: 'A is correct. A Record Producer creates task-based records (like Incidents) through the Service Catalog interface.' },
+
+    { id: 'q155', type: 'single', text: 'What is the result of the ACL evaluation order?', options: [
+      { value: 'a', label: 'Ensures the user has field access before table access is considered' },
+      { value: 'b', label: 'Ensures users can start working as quickly as possible' },
+      { value: 'c', label: 'Ensures the user has application access before evaluating module access' },
+      { value: 'd', label: 'Ensures the user has table access before evaluating field access' }
+    ], correct: ['d'], discussion: 'D is correct. ACL evaluation checks table-level access first, then field-level access (from most specific to most general at each level).' },
+
+    { id: 'q156', type: 'single', text: 'Which tool graphically displays a CI and its relationships with other CIs?', options: [
+      { value: 'a', label: 'Schema Map' },
+      { value: 'b', label: 'Dependency View' },
+      { value: 'c', label: 'Dependency Map' },
+      { value: 'd', label: 'Database View' }
+    ], correct: ['b'], discussion: 'B is correct. The Dependency View graphically displays a CI and its relationships with other CIs in the infrastructure.' },
+
+    { id: 'q157', type: 'single', text: 'What are examples of core tables in the ServiceNow platform?', options: [
+      { value: 'a', label: 'Configuration, Connection, Chat' },
+      { value: 'b', label: 'Team, Party, Recognition' },
+      { value: 'c', label: 'User, Task, Incident' },
+      { value: 'd', label: 'Work, Caller, Timecard' }
+    ], correct: ['c'], discussion: 'C is correct. User, Task, and Incident are examples of core tables in ServiceNow.' },
+
+    { id: 'q158', type: 'single', text: 'Which tab in the Knowledge Base record identifies the set of users who can read articles in that knowledge base?', options: [
+      { value: 'a', label: 'Access List' },
+      { value: 'b', label: 'Can Access' },
+      { value: 'c', label: 'Accessible' },
+      { value: 'd', label: 'Can Read' }
+    ], correct: ['d'], discussion: 'D is correct. The "Can Read" tab in the Knowledge Base record defines which users can read articles in that knowledge base.' },
+
+    { id: 'q159', type: 'multi', text: 'What are the main components of the Form Design interface? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'Field Layout' },
+      { value: 'b', label: 'Page Header' },
+      { value: 'c', label: 'Field Navigator' },
+      { value: 'd', label: 'Field Picker' },
+      { value: 'e', label: 'Form Layout' }
+    ], correct: ['b', 'c', 'e'], discussion: 'B, C, and E are correct. The Form Design interface consists of: Page Header, Field Navigator, and Form Layout.' },
+
+    { id: 'q160', type: 'single', text: 'What is used to determine user access to a Knowledge Base or Knowledge Articles?', options: [
+      { value: 'a', label: 'sn_kb_read, sn_article_read' },
+      { value: 'b', label: 'Privacy settings' },
+      { value: 'c', label: 'Read access flag' },
+      { value: 'd', label: 'User Criteria' }
+    ], correct: ['d'], discussion: 'D is correct. User Criteria determines who can access Knowledge Bases and Knowledge Articles.' },
+
+    { id: 'q161', type: 'multi', text: 'What are the three primary tables in the Enterprise CMDB? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'cmdb' },
+      { value: 'b', label: 'sn_cmdb_bak' },
+      { value: 'c', label: 'cmdb_rel_ci' },
+      { value: 'd', label: 'sn_cmdb' },
+      { value: 'e', label: 'cmdb_bak' },
+      { value: 'f', label: 'cmdb_ci' },
+      { value: 'g', label: 'sn_cmdb_ci' }
+    ], correct: ['a', 'c', 'f'], discussion: 'A, C, and F are correct. The three primary CMDB tables are: cmdb, cmdb_rel_ci (CI Relationships), and cmdb_ci (Configuration Items).' },
+
+    { id: 'q162', type: 'single', text: 'What is the best practice regarding the Default update set when moving customizations between instances?', options: [
+      { value: 'a', label: 'Merge the default update set before moving it between instances' },
+      { value: 'b', label: 'Submit the default update set to the application repository' },
+      { value: 'c', label: 'Do not use the Default update set to move customizations between instances' },
+      { value: 'd', label: 'Limit the Default update set to a maximum of 20 records for troubleshooting' }
+    ], correct: ['c'], discussion: 'C is correct. The Default update set should NOT be used to move customizations between instances. Named update sets should be used instead.' },
+
+    { id: 'q163', type: 'single', text: 'Where in a ServiceNow instance can you find the "Impersonate User" option?', options: [
+      { value: 'a', label: 'Modules' },
+      { value: 'b', label: 'Content Frame' },
+      { value: 'c', label: 'Application Navigator' },
+      { value: 'd', label: 'Banner' }
+    ], correct: ['d'], discussion: 'D is correct. The "Impersonate User" option is found in the Banner area (via the user avatar/menu).' },
+
+    { id: 'q164', type: 'single', text: 'If a knowledge base has no access details specified, which users can read articles in that knowledge base?', options: [
+      { value: 'a', label: 'ITIL users' },
+      { value: 'b', label: 'All users with the article permalink' },
+      { value: 'c', label: 'All active users' },
+      { value: 'd', label: 'No users' },
+      { value: 'e', label: 'Users with the kb_user role' }
+    ], correct: ['c'], discussion: 'C is correct. If no access details are specified for a knowledge base, all active users can read the articles in it.' },
+
+    { id: 'q165', type: 'single', text: 'To allow ITIL users to create Incident records, how should an access control be defined?', options: [
+      { value: 'a', label: 'Name: incident.None; Operation: create; Role: itil' },
+      { value: 'b', label: 'Name: incident.Any; Operation: write; Permission: itil' },
+      { value: 'c', label: 'Name: incident:*; Permission: write; Role: itil' },
+      { value: 'd', label: 'Name: incident.None; Permission: create; Role: itil' },
+      { value: 'e', label: 'Name: incident:*; Operation: write; Permission: itil' }
+    ], correct: ['a'], discussion: 'A is correct. The ACL definition: Name: incident.None (table-level, no specific field); Operation: create; Role: itil.' },
+
+    { id: 'q166', type: 'single', text: 'Which Service Catalog feature is used to organize items into logical groups?', options: [
+      { value: 'a', label: 'Categories' },
+      { value: 'b', label: 'Variable Sets' },
+      { value: 'c', label: 'Sections' },
+      { value: 'd', label: 'Catalog Items' }
+    ], correct: ['a'], discussion: 'A is correct. Categories are used in the Service Catalog to organize items into logical groups.' },
+
+    { id: 'q167', type: 'multi', text: 'Which three workflows are built into the ServiceNow platform? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'Federal Workflows' },
+      { value: 'b', label: 'Customer Workflows' },
+      { value: 'c', label: 'Infrastructure Workflows' },
+      { value: 'd', label: 'Manufacturing Workflows' },
+      { value: 'e', label: 'Employee Workflows' },
+      { value: 'f', label: 'IT Workflows' }
+    ], correct: ['b', 'e', 'f'], discussion: 'B, E, and F are correct. ServiceNow\'s built-in workflow categories are: Customer Workflows, Employee Workflows, and IT Workflows.' },
+
+    { id: 'q168', type: 'single', text: 'An IT manager is responsible for the Network and Hardware assignment groups (5 members each). Tasks are not showing in Service Desk > My Group Work. What is likely the cause?', options: [
+      { value: 'a', label: 'The "Manager" field on the assignment groups is blank' },
+      { value: 'b', label: 'The manager does not have the ITIL role' },
+      { value: 'c', label: 'The manager is not a member of the Service Desk group' },
+      { value: 'd', label: 'The manager is not a member of the Network and Hardware groups' }
+    ], correct: ['d'], discussion: 'D is correct. "My Group Work" shows unassigned tasks for groups the user is a member of. If the manager isn\'t a member of the Network and Hardware groups, those tasks won\'t appear.' },
+
+    { id: 'q169', type: 'multi', text: 'An employee needs to order a tablet and select standard accessory options. What approach do you take? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'Create a catalog item for the tablet and add a variable set for the accessory options' },
+      { value: 'b', label: 'Create a record producer with checkbox variables for each accessory' },
+      { value: 'c', label: 'Select the option to show an "Add Accessories" button in shopping cart settings' },
+      { value: 'd', label: 'Create separate catalog items for the tablet, case, cleaner, stand, and protector' },
+      { value: 'e', label: 'Create a catalog item for the tablet and add checkbox variables for each accessory' }
+    ], correct: ['a', 'd', 'e'], discussion: 'A, D, and E are correct. Valid approaches include creating a tablet catalog item with a variable set (A), with checkbox variables (E), or creating individual catalog items for each option (D).' },
+
+    { id: 'q170', type: 'single', text: 'Which ServiceNow utility provides the most current interactive graphical interface to visualize CIs and their relationships?', options: [
+      { value: 'a', label: 'Dependency View' },
+      { value: 'b', label: 'CI Class Map' },
+      { value: 'c', label: 'Business Service Map' },
+      { value: 'd', label: 'CSDM Schema' }
+    ], correct: ['a'], discussion: 'A is correct. The Dependency View provides the most current interactive graphical interface for visualizing CIs and their relationships (built on D3 and Angular).' },
+
+    { id: 'q171', type: 'single', text: 'What is a group in ServiceNow?', options: [
+      { value: 'a', label: 'A collection of subject matter experts (SMEs)' },
+      { value: 'b', label: 'A team of users' },
+      { value: 'c', label: 'An escalation pod' },
+      { value: 'd', label: 'A collection of users' },
+      { value: 'e', label: 'A department' }
+    ], correct: ['d'], discussion: 'D is correct. A group is a collection of users. Users can belong to multiple groups across different teams or departments.' },
+
+    { id: 'q172', type: 'multi', text: 'In the Report page, which sections show reports for different audiences? (Choose 4)', requiredCount: 4, options: [
+      { value: 'a', label: 'Group' },
+      { value: 'b', label: 'Department' },
+      { value: 'c', label: 'My Reports' },
+      { value: 'd', label: 'Team' },
+      { value: 'e', label: 'Global' },
+      { value: 'f', label: 'All' }
+    ], correct: ['a', 'c', 'e', 'f'], discussion: 'A, C, E, and F are correct. The report visibility sections are: My Reports, Group, Global, and All.' },
+
+    { id: 'q173', type: 'single', text: 'A filter condition has elements based on a table, the user\'s access rights, and the table\'s columns. What are these elements called?', options: [
+      { value: 'a', label: 'Labels' },
+      { value: 'b', label: 'Columns' },
+      { value: 'c', label: 'Data elements' },
+      { value: 'd', label: 'Fields' },
+      { value: 'e', label: 'Attributes' }
+    ], correct: ['d'], discussion: 'D is correct. The elements in a filter condition are called Fields (based on the table, user access, and table columns).' },
+
+    { id: 'q174', type: 'single', text: 'A user needs to order a new iPhone with 2-level approval, and both approver and user should be notified automatically at each approval stage. Which feature manages approvals and notifications?', options: [
+      { value: 'a', label: 'Approval Chain' },
+      { value: 'b', label: 'Flow' },
+      { value: 'c', label: 'Approver Delegate' },
+      { value: 'd', label: 'Parent-Child Approver' },
+      { value: 'e', label: 'Approval Criteria' }
+    ], correct: ['b'], discussion: 'B is correct. A Flow (in Flow Designer) manages multi-stage approvals and automated notifications at each stage.' },
+
+    { id: 'q175', type: 'single', text: 'Which table do groups get stored in?', options: [
+      { value: 'a', label: 'User Groups [user_groups]' },
+      { value: 'b', label: 'Groups [sys_user_groups]' },
+      { value: 'c', label: 'Groups [sn_sys_user_group]' },
+      { value: 'd', label: 'Groups [sys_user_group]' },
+      { value: 'e', label: 'User Groups [sn_user_groups]' }
+    ], correct: ['d'], discussion: 'D is correct. Groups are stored in the Groups [sys_user_group] table.' },
+
+    { id: 'q176', type: 'multi', text: 'When managing tags, what visibility options are available? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'Groups and users' },
+      { value: 'b', label: 'Me' },
+      { value: 'c', label: 'Roles and permissions' },
+      { value: 'd', label: 'Everyone' },
+      { value: 'e', label: 'Admins' }
+    ], correct: ['a', 'b', 'd'], discussion: 'A, B, and D are correct. Tag visibility options are: Groups and Users, Me (just yourself), and Everyone.' },
+
+    { id: 'q177', type: 'single', text: 'Which module allows an administrator to define where imported data from any ServiceNow table is stored?', options: [
+      { value: 'a', label: 'Field Transform' },
+      { value: 'b', label: 'Schema Map' },
+      { value: 'c', label: 'Transform Map' },
+      { value: 'd', label: 'Import Map' }
+    ], correct: ['c'], discussion: 'C is correct. The Transform Map module allows administrators to define where imported data goes in the target table.' },
+
+    { id: 'q178', type: 'single', text: 'Which icon on the form header is used to access form templates?', options: [
+      { value: 'a', label: 'Stamp' },
+      { value: 'b', label: 'Page' },
+      { value: 'c', label: 'More Options (...)' },
+      { value: 'd', label: 'Clip' }
+    ], correct: ['c'], discussion: 'C is correct. The More Options (...) icon in the form header is used to access form templates (via Toggle Template Bar).' },
+
+    { id: 'q179', type: 'single', text: 'When using the Data Pill Picker, which key is used to dot-walk to fields in other tables?', options: [
+      { value: 'a', label: 'Plus, Minus' },
+      { value: 'b', label: 'Ctrl <, Ctrl >' },
+      { value: 'c', label: 'Arrow keys' },
+      { value: 'd', label: 'Ctrl C, Ctrl V' },
+      { value: 'e', label: 'Shift F4, Shift F5' }
+    ], correct: ['c'], discussion: 'C is correct. Arrow keys are used to dot-walk to fields in other tables when using the Data Pill Picker.' },
+
+    { id: 'q180', type: 'single', text: 'In what order are access controls evaluated?', options: [
+      { value: 'a', label: 'Field level (most specific to most general); then Table level (most specific to most general)' },
+      { value: 'b', label: 'Field level (most general to most specific); then Row level (most specific to most general)' },
+      { value: 'c', label: 'Table level (most specific to most general); then Field level (most specific to most general)' },
+      { value: 'd', label: 'Table level (most specific to most general); then Record level (most specific to most general)' }
+    ], correct: ['c'], discussion: 'C is correct. Access controls are evaluated: Table level first (most specific to most general), then Field level (most specific to most general).' },
+
+    { id: 'q181', type: 'single', text: 'Which instance resource provides access to guided tours, action information, and instructions about inputs and outputs within a flow?', options: [
+      { value: 'a', label: 'Documentation' },
+      { value: 'b', label: 'Community' },
+      { value: 'c', label: 'Help Panel (question mark icon)' },
+      { value: 'd', label: 'Wiki' }
+    ], correct: ['c'], discussion: 'C is correct. The Help Panel provides guided tours and contextual help within Flow Designer.' },
+
+    { id: 'q182', type: 'single', text: 'Which section of Report Designer specifies the report name and table/data source?', options: [
+      { value: 'a', label: 'Style' },
+      { value: 'b', label: 'Grouping' },
+      { value: 'c', label: 'Configure' },
+      { value: 'd', label: 'Source' },
+      { value: 'e', label: 'Data' }
+    ], correct: ['e'], discussion: 'E is correct. The Data section is the first tab in Report Designer, where you enter the report name and select the data source (table).' },
+
+    { id: 'q183', type: 'single', text: 'To display a "Save" button on the form header, what action do you need to take?', options: [
+      { value: 'a', label: 'Context Menu > Form Design > Add Save button' },
+      { value: 'b', label: 'All > System Properties > UI Properties > Enable the glide.ui.advanced property' },
+      { value: 'c', label: 'All > System Properties > UI Properties > Enable Save button' },
+      { value: 'd', label: 'Context Menu > Form Layout > Add Save button' }
+    ], correct: ['c'], discussion: 'C is correct. Enable the Save button through System Properties > UI Properties. The underlying property is glide.ui.advanced.' },
+
+    { id: 'q184', type: 'single', text: 'Which ensures data integrity when importing data via Import Sets and Web Services?', options: [
+      { value: 'a', label: 'UI Policy' },
+      { value: 'b', label: 'Data Policy' },
+      { value: 'c', label: 'Business Rule' },
+      { value: 'd', label: 'Client Script' },
+      { value: 'e', label: 'CSDM' }
+    ], correct: ['b'], discussion: 'B is correct. Data Policies apply to all data entering the platform regardless of source, including Import Sets and Web Services.' },
+
+    { id: 'q185', type: 'single', text: 'What initiates the execution of a flow in Flow Designer?', options: [
+      { value: 'a', label: 'Flow Logic' },
+      { value: 'b', label: 'An existing subflow' },
+      { value: 'c', label: 'An execution data pill' },
+      { value: 'd', label: 'A trigger' }
+    ], correct: ['d'], discussion: 'D is correct. Triggers initiate the execution of flows in Flow Designer.' },
+
+    { id: 'q186', type: 'single', text: 'What is the string that displays filter conditions called?', options: [
+      { value: 'a', label: 'Breadcrumb' },
+      { value: 'b', label: 'Selection' },
+      { value: 'c', label: 'Menu' },
+      { value: 'd', label: 'Topic' }
+    ], correct: ['a'], discussion: 'A is correct. The Breadcrumb is the string that displays the active filter conditions in a list view.' },
+
+    { id: 'q187', type: 'single', text: 'Which system property is set to true to log impersonation events?', options: [
+      { value: 'a', label: 'glide.sys.all_impersonation' },
+      { value: 'b', label: 'glide.user_setting' },
+      { value: 'c', label: 'glide.sys.log_impersonation' },
+      { value: 'd', label: 'glide.sys.admin_login' }
+    ], correct: ['c'], discussion: 'C is correct. Setting glide.sys.log_impersonation to true enables logging of impersonation events in the system log.' },
+
+    { id: 'q188', type: 'single', text: 'What process enables users to create, categorize, review, approve, and view important information in a centralized shared location?', options: [
+      { value: 'a', label: 'Self-Service Administration' },
+      { value: 'b', label: 'Knowledge Management' },
+      { value: 'c', label: 'Business Information Management' },
+      { value: 'd', label: 'Information Portal Administration' },
+      { value: 'e', label: 'Knowledge-Centered Administration' }
+    ], correct: ['b'], discussion: 'B is correct. Knowledge Management enables creation, categorization, review, approval, and viewing of important information in a centralized location.' },
+
+    { id: 'q189', type: 'single', text: 'A colleague wants to rearrange columns in their My Work list. Where do they go after navigating to the list?', options: [
+      { value: 'a', label: 'Right-click any column header, then Context Menu > Configure > List Layout' },
+      { value: 'b', label: 'Click the list context menu > Configure > List Layout' },
+      { value: 'c', label: 'Click the list context menu > Personalize List' },
+      { value: 'd', label: 'Click Personalize List (gear icon)' }
+    ], correct: ['d'], discussion: 'D is correct. The gear icon (Personalize List) allows individual users to rearrange and select columns for their personal view without affecting other users.' },
+
+    { id: 'q190', type: 'single', text: 'You are viewing active incidents and want to exclude "Resolved" state incidents. What do you do?', options: [
+      { value: 'a', label: 'In the search, select State and type "not Resolved" then press Enter' },
+      { value: 'b', label: 'Right-click State column title and select Exclude Filter > Resolved' },
+      { value: 'c', label: 'Right-click the "Resolved" value in the list and select "Exclude"' },
+      { value: 'd', label: 'Right-click the "Resolved" value and select "Filter Out"' }
+    ], correct: ['c'], discussion: 'C is correct. Right-clicking a value in the list and selecting "Exclude" filters out records with that value.' },
+
+    { id: 'q191', type: 'single', text: 'Which role inherits all permissions from the catalog role and user_criteria_admin role, plus has permission to create items and services?', options: [
+      { value: 'a', label: 'System Administrator [sys_admin]' },
+      { value: 'b', label: 'Catalog Admin [catalog_admin]' },
+      { value: 'c', label: 'Catalog Writer [sn_catalog_write]' },
+      { value: 'd', label: 'Item Admin [sn_item_admin]' }
+    ], correct: ['b'], discussion: 'B is correct. The catalog_admin role inherits from catalog and user_criteria_admin roles, and also allows creating items and services.' },
+
+    { id: 'q192', type: 'single', text: 'Which ServiceNow infrastructure component defines all tables and fields in the system?', options: [
+      { value: 'a', label: 'Schema' },
+      { value: 'b', label: 'Field Map' },
+      { value: 'c', label: 'Table Class Manager' },
+      { value: 'd', label: 'Dictionary' },
+      { value: 'e', label: 'Data Atlas' }
+    ], correct: ['d'], discussion: 'D is correct. The Dictionary defines all tables and fields in the ServiceNow system.' },
+
+    { id: 'q193', type: 'multi', text: 'Which data integrity settings can be achieved using UI Policies? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'Set a field to accept data in an expected format' },
+      { value: 'b', label: 'Set a field to accept data of N number of characters' },
+      { value: 'c', label: 'Set a field to hidden' },
+      { value: 'd', label: 'Set a field to read-only' },
+      { value: 'e', label: 'Set a field to mandatory' }
+    ], correct: ['c', 'd', 'e'], discussion: 'C, D, and E are correct. UI Policies can control: field visibility (hidden), read-only status, and mandatory status.' },
+
+    { id: 'q194', type: 'single', text: 'To validate submission data on a form using a client script, which type would you recommend?', options: [
+      { value: 'a', label: 'onSubmit()' },
+      { value: 'b', label: 'onSubmission()' },
+      { value: 'c', label: 'onUpdate()' },
+      { value: 'd', label: 'onLoad()' }
+    ], correct: ['a'], discussion: 'A is correct. The onSubmit() client script type runs when a form is submitted, allowing validation before the record is saved.' },
+
+    { id: 'q195', type: 'multi', text: 'An order was placed from the Service Catalog, creating two records. Which two records are associated? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'A record in the sc_req_item table' },
+      { value: 'b', label: 'An sc_task record' },
+      { value: 'c', label: 'An Incident record' },
+      { value: 'd', label: 'A Change record' },
+      { value: 'e', label: 'A Problem record' }
+    ], correct: ['a', 'b'], discussion: 'A and B are correct. A catalog order creates an RITM (sc_req_item) and may create SCTASKs (sc_task) through the workflow.' },
+
+    { id: 'q196', type: 'single', text: 'To customize column layout in a list, which action do you perform?', options: [
+      { value: 'a', label: 'Context Menu > View > Customize' },
+      { value: 'b', label: 'Click gear icon > Personalize window options > Select appropriate columns' },
+      { value: 'c', label: 'Select a column and choose customize on the right side of the header' },
+      { value: 'd', label: 'Select column, click the pencil icon, and choose customize option' }
+    ], correct: ['b'], discussion: 'B is correct. Click the gear icon (Personalize List) and select the columns you want to display.' },
+
+    { id: 'q197', type: 'single', text: 'After a new office equipment order via Service Catalog, how do you view the list of requests?', options: [
+      { value: 'a', label: 'All > Tables and Columns > Task' },
+      { value: 'b', label: 'Type "requests.list" in the navigation filter' },
+      { value: 'c', label: 'All > Service Catalog > Requests' },
+      { value: 'd', label: 'All > Service Catalog > Open Records > Items' }
+    ], correct: ['d'], discussion: 'D is correct. Navigate to All > Service Catalog > Open Records > Items to view the RITM records with their associated REQ details.' },
+
+    { id: 'q198', type: 'single', text: 'To access the table configuration page from a form, which path do you select?', options: [
+      { value: 'a', label: 'Form Context Menu > View > Show Table' },
+      { value: 'b', label: 'Form Context Menu > View > Table' },
+      { value: 'c', label: 'Form Context Menu > Configure > Dictionary' },
+      { value: 'd', label: 'Form Context Menu > Configure > Table' }
+    ], correct: ['d'], discussion: 'D is correct. Context Menu > Configure > Table accesses the table configuration page from a form.' },
+
+    { id: 'q199', type: 'single', text: 'Which admin role is required to change high-security settings?', options: [
+      { value: 'a', label: 'high_sec_admin' },
+      { value: 'b', label: 'sn_acl_admin' },
+      { value: 'c', label: 'admin' },
+      { value: 'd', label: 'security_admin' }
+    ], correct: ['d'], discussion: 'D is correct. The security_admin role is required to change high-security settings and modify ACLs.' },
+
+    { id: 'q200', type: 'single', text: 'What is the most common role giving access to almost all features and data in the platform?', options: [
+      { value: 'a', label: 'Super User [sn_super_user]' },
+      { value: 'b', label: 'Security Admin [security_admin]' },
+      { value: 'c', label: 'System Administrator [admin]' },
+      { value: 'd', label: 'Base Admin [base_admin]' },
+      { value: 'e', label: 'System Manager [sys_manager]' }
+    ], correct: ['c'], discussion: 'C is correct. The System Administrator [admin] role has access to almost all platform features, functions, and data.' },
+
+    { id: 'q201', type: 'single', text: 'To move multiple update sets at once, what do you use?', options: [
+      { value: 'a', label: 'Preview' },
+      { value: 'b', label: 'Batch' },
+      { value: 'c', label: 'List' },
+      { value: 'd', label: 'Map' }
+    ], correct: ['b'], discussion: 'B is correct. Batch update sets group multiple update sets so they can be previewed and committed together.' },
+
+    { id: 'q202', type: 'single', text: 'After making changes to a report, to check results without saving, where do you click?', options: [
+      { value: 'a', label: 'Preview' },
+      { value: 'b', label: 'Test' },
+      { value: 'c', label: 'Run' },
+      { value: 'd', label: 'Try it' }
+    ], correct: ['c'], discussion: 'C is correct. Clicking "Run" executes the report with current settings without saving changes.' },
+
+    { id: 'q203', type: 'single', text: 'Which framework can automatically populate Priority and Category fields based on the value in Short Description?', options: [
+      { value: 'a', label: 'Predictive Intelligence' },
+      { value: 'b', label: 'Assignment Rules' },
+      { value: 'c', label: 'CSDM' },
+      { value: 'd', label: 'Actions' },
+      { value: 'e', label: 'UI Policies' }
+    ], correct: ['a'], discussion: 'A is correct. Predictive Intelligence uses machine learning to automatically populate field values based on text inputs like Short Description.' },
+
+    { id: 'q204', type: 'single', text: 'Which testing framework is used for ServiceNow applications?', options: [
+      { value: 'a', label: 'Test Driven Framework (TDF)' },
+      { value: 'b', label: 'Junit' },
+      { value: 'c', label: 'Selenium' },
+      { value: 'd', label: 'Automated Test Framework (ATF)' }
+    ], correct: ['d'], discussion: 'D is correct. ATF (Automated Test Framework) is ServiceNow\'s built-in testing framework.' },
+
+    { id: 'q205', type: 'single', text: 'Which can create task-based records from the Service Catalog?', options: [
+      { value: 'a', label: 'Assignment Rules' },
+      { value: 'b', label: 'Flow Designer' },
+      { value: 'c', label: 'UI Builder' },
+      { value: 'd', label: 'Record Producer' }
+    ], correct: ['d'], discussion: 'D is correct. Record Producers create task-based records (Incidents, Changes, etc.) through the Service Catalog.' },
+
+    { id: 'q206', type: 'single', text: 'Which module is used to access available reports in ServiceNow?', options: [
+      { value: 'a', label: 'Self-Service > My Reports' },
+      { value: 'b', label: 'Self-Service > My Dashboards' },
+      { value: 'c', label: 'Reports > View / Run' },
+      { value: 'd', label: 'Reports > Homepage' },
+      { value: 'e', label: 'Reports > Overview' }
+    ], correct: ['c'], discussion: 'C is correct. Reports > View/Run is the module to access and run existing reports.' },
+
+    { id: 'q207', type: 'single', text: 'Security rules that restrict what data users can view and interact with are called what?', options: [
+      { value: 'a', label: 'CRUD Rules' },
+      { value: 'b', label: 'Access Control Rules' },
+      { value: 'c', label: 'Role Assignment Rules' },
+      { value: 'd', label: 'Scripted User Rules' }
+    ], correct: ['b'], discussion: 'B is correct. Access Control Rules (ACL Rules) define what data users can view and interact with.' },
+
+    { id: 'q208', type: 'multi', text: 'A new IT employee needs to work in the Network and Hardware groups. How do you configure access? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'Add the user account to the Hardware group' },
+      { value: 'b', label: 'Add the user account to the IT Knowledge Base' },
+      { value: 'c', label: 'Create a user account' },
+      { value: 'd', label: 'Add the user account to the ITIL group' },
+      { value: 'e', label: 'Add the user account to the Network group' },
+      { value: 'f', label: 'Add the user account to an ACL' }
+    ], correct: ['a', 'c', 'e'], discussion: 'A, C, and E are correct. Create a user account, then add to Network group and Hardware group (roles are inherited via group membership).' },
+
+    { id: 'q209', type: 'single', text: 'A customer wants to change the default task list layout. After navigating to the list, where do you click to meet this requirement?', options: [
+      { value: 'a', label: 'Click list context menu > Personalize List' },
+      { value: 'b', label: 'Click list context menu > Configure > Columns' },
+      { value: 'c', label: 'Right-click the list gear icon > Configure > Columns' },
+      { value: 'd', label: 'Right-click any column header, then Context Menu > Configure > List Layout' }
+    ], correct: ['d'], discussion: 'D is correct. To change the default list layout for everyone: right-click any column header > Configure > List Layout.' },
+
+    { id: 'q210', type: 'single', text: 'Which ServiceNow feature can deliver knowledge articles through a conversational messaging interface?', options: [
+      { value: 'a', label: 'Agent Assist' },
+      { value: 'b', label: 'Virtual Agent' },
+      { value: 'c', label: 'Now Messenger' },
+      { value: 'd', label: 'Instance Chat' }
+    ], correct: ['b'], discussion: 'B is correct. Virtual Agent delivers knowledge articles and other content through a conversational messaging interface.' },
+
+    { id: 'q211', type: 'single', text: 'Which element in the form header allows access to form templates?', options: [
+      { value: 'a', label: 'Stamp' },
+      { value: 'b', label: 'More Options (...)' },
+      { value: 'c', label: 'Page' },
+      { value: 'd', label: 'Clip' }
+    ], correct: ['b'], discussion: 'B is correct. The More Options (...) button in the form header provides access to form templates via Toggle Template Bar.' },
+
+    { id: 'q212', type: 'single', text: 'What is a group in ServiceNow?', options: [
+      { value: 'a', label: 'A collection of subject matter experts' },
+      { value: 'b', label: 'A department' },
+      { value: 'c', label: 'An escalation pod' },
+      { value: 'd', label: 'A collection of users' },
+      { value: 'e', label: 'A collection of tasks' }
+    ], correct: ['d'], discussion: 'D is correct. A group is a collection of users in ServiceNow.' },
+
+    { id: 'q213', type: 'single', text: 'Which ServiceNow utility provides the most current interactive graphical interface for visualizing CIs and their relationships?', options: [
+      { value: 'a', label: 'Flow Design' },
+      { value: 'b', label: 'CI Class Map' },
+      { value: 'c', label: 'Dependency View' },
+      { value: 'd', label: 'Business Service Map' }
+    ], correct: ['c'], discussion: 'C is correct. The Dependency View is the modern interactive graphical interface for visualizing CIs and their relationships.' },
+
+    { id: 'q214', type: 'single', text: 'What icon do you use to change the Favorites label?', options: [
+      { value: 'a', label: 'Star' },
+      { value: 'b', label: 'Clock' },
+      { value: 'c', label: 'Triangle' },
+      { value: 'd', label: 'Pencil' }
+    ], correct: ['d'], discussion: 'D is correct. The pencil icon is used to edit (change) the Favorites label.' },
+
+    { id: 'q215', type: 'single', text: 'Which tool is used to define field relationships between an import set table and a target table?', options: [
+      { value: 'a', label: 'Schema Map' },
+      { value: 'b', label: 'Field Transform Tool' },
+      { value: 'c', label: 'Transform Map' },
+      { value: 'd', label: 'Transform Schema' }
+    ], correct: ['c'], discussion: 'C is correct. A Transform Map defines field mappings between the import set table and the target table.' },
+
+    { id: 'q216', type: 'single', text: 'When moving homepages or dashboards between instances, what must you remember?', options: [
+      { value: 'a', label: 'Download both PDF and XML files' },
+      { value: 'b', label: 'They cannot be moved via update sets' },
+      { value: 'c', label: 'The platform automatically adds them to update sets' },
+      { value: 'd', label: 'Add them manually to update sets' }
+    ], correct: ['d'], discussion: 'D is correct. Homepages and dashboards are NOT automatically captured in update sets; you must manually add them.' },
+
+    { id: 'q217', type: 'single', text: 'Which can create task-based records from the Service Catalog?', options: [
+      { value: 'a', label: 'Record Producer' },
+      { value: 'b', label: 'UI Builder' },
+      { value: 'c', label: 'Assignment Rules' },
+      { value: 'd', label: 'UI Actions' },
+      { value: 'e', label: 'Flow Designer' }
+    ], correct: ['a'], discussion: 'A is correct. Record Producers create task-based records (such as Incidents) through the Service Catalog.' },
+
+    { id: 'q218', type: 'single', text: 'Which tab in a Knowledge Base record defines users who CAN write articles to that knowledge base?', options: [
+      { value: 'a', label: 'Cannot Submit' },
+      { value: 'b', label: 'Cannot Author' },
+      { value: 'c', label: 'Can Read' },
+      { value: 'd', label: 'Can Write' },
+      { value: 'e', label: 'Can Contribute' }
+    ], correct: ['e'], discussion: 'E is correct. The "Can Contribute" tab defines users who have write access to contribute articles to the knowledge base.' },
+
+    { id: 'q219', type: 'single', text: 'Which type of script runs in the browser?', options: [
+      { value: 'a', label: 'UI Policies' },
+      { value: 'b', label: 'Script Include scripts' },
+      { value: 'c', label: 'Access Control scripts' },
+      { value: 'd', label: 'Business Rule scripts' }
+    ], correct: ['a'], discussion: 'A is correct. UI Policies run on the client side (in the browser).' },
+
+    { id: 'q220', type: 'single', text: 'To trace connections from an infrastructure item like a server to services that depend on that server, what do you use?', options: [
+      { value: 'a', label: 'Auto-mapping Utility' },
+      { value: 'b', label: 'Relationships' },
+      { value: 'c', label: 'Service Tracer' },
+      { value: 'd', label: 'Transform Map' }
+    ], correct: ['b'], discussion: 'B is correct. Relationships in the CMDB are used to trace connections between CIs and the services that depend on them.' },
+
+    { id: 'q221', type: 'single', text: 'Which section of a task record shows the most recent updates to a record?', options: [
+      { value: 'a', label: 'Timeline' },
+      { value: 'b', label: 'Related Lists' },
+      { value: 'c', label: 'Activity Stream' },
+      { value: 'd', label: 'Audit Log' }
+    ], correct: ['c'], discussion: 'C is correct. The Activity Stream shows the most recent updates, comments, and history for a record.' },
+
+    { id: 'q222', type: 'single', text: 'When using the CMDB, what are components that need to be managed to deliver services called?', options: [
+      { value: 'a', label: 'Configuration Items' },
+      { value: 'b', label: 'Assets' },
+      { value: 'c', label: 'Catalog Items' },
+      { value: 'd', label: 'Data Plows' },
+      { value: 'e', label: 'Service Offerings' }
+    ], correct: ['a'], discussion: 'A is correct. Configuration Items (CIs) are the managed components that are needed to deliver services.' },
+
+    { id: 'q223', type: 'single', text: 'To apply a UI Policy to all views, which field in the definition record must be set to true?', options: [
+      { value: 'a', label: 'Global' },
+      { value: 'b', label: 'Reverse if False' },
+      { value: 'c', label: 'On Load' },
+      { value: 'd', label: 'Inherit' }
+    ], correct: ['a'], discussion: 'A is correct. Setting the "Global" checkbox to true on a UI Policy applies it to all form views. If unchecked, it is view-specific.' },
+
+    { id: 'q224', type: 'single', text: 'Which step in the data import process using Import Sets defines where input data columns from a spreadsheet are written in the target table?', options: [
+      { value: 'a', label: 'Schedule Transform' },
+      { value: 'b', label: 'Field Matching' },
+      { value: 'c', label: 'Select Data Source' },
+      { value: 'd', label: 'Create Transform Map' },
+      { value: 'e', label: 'Load Data' }
+    ], correct: ['d'], discussion: 'D is correct. Creating a Transform Map defines which import set fields map to which fields in the target table.' },
+
+    { id: 'q225', type: 'single', text: 'Which of the following correctly describes data import steps using Import Sets?', options: [
+      { value: 'a', label: 'Identify source; import transform map; run transformer; validate import' },
+      { value: 'b', label: 'Select source file; run auto-mapping; transform data; clean up target table' },
+      { value: 'c', label: 'Configure LDAP; test map; create update set; run import; apply update set' },
+      { value: 'd', label: 'Load data; create transform map; transform data; clean up import table' }
+    ], correct: ['d'], discussion: 'D is correct. The Import Set process: Load Data > Create Transform Map > Transform Data > Clean up.' },
+
+    { id: 'q226', type: 'single', text: 'When importing from a spreadsheet, which step defines where columns from the input data are written in the target table?', options: [
+      { value: 'a', label: 'Schedule Transform' },
+      { value: 'b', label: 'Field Matching' },
+      { value: 'c', label: 'Select Data Source' },
+      { value: 'd', label: 'Create Transform Map' },
+      { value: 'e', label: 'Load Data' }
+    ], correct: ['d'], discussion: 'D is correct. The Transform Map defines the field-to-field mapping between the import set and target table.' },
+
+    { id: 'q227', type: 'single', text: 'To apply a UI Policy to all views, which field must be set to true?', options: [
+      { value: 'a', label: 'Global' },
+      { value: 'b', label: 'Reverse if False' },
+      { value: 'c', label: 'On Load' },
+      { value: 'd', label: 'Inherit' }
+    ], correct: ['a'], discussion: 'A is correct. The Global checkbox applies a UI Policy to all form views when enabled.' },
+
+    { id: 'q228', type: 'single', text: 'Which steps are used to import data via Import Sets?', options: [
+      { value: 'a', label: 'Select source file; run auto-mapping; transform data; clean target table' },
+      { value: 'b', label: 'Identify source; import transform map; run transformer; validate import' },
+      { value: 'c', label: 'Configure LDAP; test map; create update set; run import; apply update set' },
+      { value: 'd', label: 'Load data; create transform map; transform data; clean up import table' }
+    ], correct: ['d'], discussion: 'D is correct. The Import Set process: Load Data > Create Transform Map > Transform Data > Clean up.' },
+
+    { id: 'q229', type: 'single', text: 'Which type of script runs in the browser?', options: [
+      { value: 'a', label: 'Script Include scripts' },
+      { value: 'b', label: 'Access Control scripts' },
+      { value: 'c', label: 'Business Rule scripts' },
+      { value: 'd', label: 'UI Policies and Client Scripts' }
+    ], correct: ['d'], discussion: 'D is correct. Both UI Policies and Client Scripts run on the client side (browser).' },
+
+    { id: 'q230', type: 'multi', text: 'Which two modules can be used to create a new table? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'Dictionary' },
+      { value: 'b', label: 'Schema Map' },
+      { value: 'c', label: 'Tables' },
+      { value: 'd', label: 'Tables and Columns' }
+    ], correct: ['c', 'd'], discussion: 'C and D are correct. New tables can be created from the Tables module or Tables and Columns module.' },
+
+    { id: 'q231', type: 'single', text: 'Which of the following describes the primary operations on tables in ServiceNow?', options: [
+      { value: 'a', label: 'Create, Read, Upload, Delete' },
+      { value: 'b', label: 'Capture, Evaluate, Write, Develop' },
+      { value: 'c', label: 'Create, Evaluate, Update, Delete' },
+      { value: 'd', label: 'Create, Read, Write, Delete' }
+    ], correct: ['d'], discussion: 'D is correct. The primary operations on tables are Create, Read, Write, Delete (CRWD). Note: "Write" is used instead of "Update" in the ACL context.' },
+
+    { id: 'q232', type: 'single', text: 'How is a user defined in ServiceNow?', options: [
+      { value: 'a', label: 'A user is a record in the [sys_user_profile] profile table' },
+      { value: 'b', label: 'A user is a record in the User [sys_user] table' },
+      { value: 'c', label: 'A user is a record in the User Preference [sys_user_preference] table' },
+      { value: 'd', label: 'A user is a field in an LDAP integration' }
+    ], correct: ['b'], discussion: 'B is correct. Users are stored in the User [sys_user] table.' },
+
+    { id: 'q233', type: 'multi', text: 'How can you define table permissions in an Access Control definition? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'Condition expression' },
+      { value: 'b', label: 'Role' },
+      { value: 'c', label: 'CRUD' },
+      { value: 'd', label: 'Script that sets the answer variable to true or false' },
+      { value: 'e', label: 'Group' }
+    ], correct: ['a', 'b', 'd'], discussion: 'A, B, and D are correct. In an ACL definition, you can specify permissions through: Condition expressions, Roles, and Scripts (that set answer to true/false).' },
+
+    { id: 'q234', type: 'single', text: 'Which tool is used to import data from various data sources and map it to ServiceNow tables?', options: [
+      { value: 'a', label: 'Transform Set' },
+      { value: 'b', label: 'Data Pack' },
+      { value: 'c', label: 'Update Set' },
+      { value: 'd', label: 'Import Set' }
+    ], correct: ['d'], discussion: 'D is correct. Import Sets is the tool used to import data from various sources and map it to ServiceNow tables.' },
+
+    { id: 'q235', type: 'single', text: 'When a Data Policy is configured to apply to all data entering the platform (via UI, Import Sets, or Web Services), where does it run by default?', options: [
+      { value: 'a', label: 'Client' },
+      { value: 'b', label: 'Network' },
+      { value: 'c', label: 'Browser' },
+      { value: 'd', label: 'Server' }
+    ], correct: ['d'], discussion: 'D is correct. Data Policies run on the server side to enforce rules regardless of how data enters the platform.' },
+
+    { id: 'q236', type: 'single', text: 'Where in a ServiceNow instance is the "Impersonate User" option found?', options: [
+      { value: 'a', label: 'User Menu' },
+      { value: 'b', label: 'Content Frame' },
+      { value: 'c', label: 'Application Navigator' },
+      { value: 'd', label: 'Modules' }
+    ], correct: ['a'], discussion: 'A is correct. The "Impersonate User" option is accessed through the User Menu in the banner.' },
+
+    { id: 'q237', type: 'single', text: 'Which flow component specifies when a flow should run?', options: [
+      { value: 'a', label: 'Triggers and condition pills' },
+      { value: 'b', label: 'Conditions and tables' },
+      { value: 'c', label: 'Trigger criteria and clock' },
+      { value: 'd', label: 'Triggers and conditions' },
+      { value: 'e', label: 'Scope and trigger conditions' }
+    ], correct: ['d'], discussion: 'D is correct. Triggers and conditions specify when a flow should run.' },
+
+    { id: 'q238', type: 'single', text: 'Which feature helps automatically assign high-priority service requests to the appropriate team member?', options: [
+      { value: 'a', label: 'Assignment Rules' },
+      { value: 'b', label: 'User Policies' },
+      { value: 'c', label: 'Predictive Intelligence' },
+      { value: 'd', label: 'UI Policies' }
+    ], correct: ['a'], discussion: 'A is correct. Assignment Rules automatically assign records to the appropriate group or individual based on defined criteria.' },
+
+    { id: 'q239', type: 'single', text: 'Which section of Report Designer specifies the report name and table/data source?', options: [
+      { value: 'a', label: 'Type' },
+      { value: 'b', label: 'Properties' },
+      { value: 'c', label: 'Configure' },
+      { value: 'd', label: 'Source' },
+      { value: 'e', label: 'Data' }
+    ], correct: ['e'], discussion: 'E is correct. The Data section in Report Designer is where you specify the report name and select the data source.' },
+
+    { id: 'q240', type: 'single', text: 'To display a Save button on the form header, what do you need to do?', options: [
+      { value: 'a', label: 'Context Menu > Form Design > Add Save button' },
+      { value: 'b', label: 'All > System Properties > UI Properties > Enable glide.ui.advanced property' },
+      { value: 'c', label: 'All > System Properties > UI Properties > Enable Save button' },
+      { value: 'd', label: 'Context Menu > Form Layout > Add Save button' }
+    ], correct: ['c'], discussion: 'C is correct. Go to System Properties > UI Properties and enable the option to show the Save button.' },
+
+    { id: 'q241', type: 'single', text: 'Which ensures data integrity when importing data using Import Sets and Web Services?', options: [
+      { value: 'a', label: 'UI Policy' },
+      { value: 'b', label: 'Data Policy' },
+      { value: 'c', label: 'Business Rule' },
+      { value: 'd', label: 'Client Script' }
+    ], correct: ['b'], discussion: 'B is correct. Data Policies ensure data integrity across all data entry paths including Import Sets and Web Services.' },
+
+    { id: 'q242', type: 'single', text: 'In Flow Designer, what initiates flow execution?', options: [
+      { value: 'a', label: 'Flow Logic' },
+      { value: 'b', label: 'An existing subflow' },
+      { value: 'c', label: 'An execution data pill' },
+      { value: 'd', label: 'A trigger' }
+    ], correct: ['d'], discussion: 'D is correct. Triggers initiate flow execution in Flow Designer.' },
+
+    { id: 'q243', type: 'single', text: 'What is the string displaying filter conditions in a list called?', options: [
+      { value: 'a', label: 'Breadcrumb' },
+      { value: 'b', label: 'Selection' },
+      { value: 'c', label: 'Menu' },
+      { value: 'd', label: 'Topic' }
+    ], correct: ['a'], discussion: 'A is correct. The Breadcrumb displays the current filter conditions applied to a list.' },
+
+    { id: 'q244', type: 'single', text: 'What process enables users to create, categorize, review, approve, and view information in a centralized location?', options: [
+      { value: 'a', label: 'Self-Service Administration' },
+      { value: 'b', label: 'Knowledge Management' },
+      { value: 'c', label: 'Business Information Management' },
+      { value: 'd', label: 'Information Portal Administration' }
+    ], correct: ['b'], discussion: 'B is correct. Knowledge Management provides the process and tools for creating, managing, and sharing organizational knowledge.' },
+
+    { id: 'q245', type: 'single', text: 'Which report section specifies groupings and calculations?', options: [
+      { value: 'a', label: 'Style' },
+      { value: 'b', label: 'Grouping' },
+      { value: 'c', label: 'Configure' },
+      { value: 'd', label: 'Data' }
+    ], correct: ['c'], discussion: 'C is correct. The Configure section in Report Designer handles groupings and aggregation calculations.' },
+
+    { id: 'q246', type: 'single', text: 'Which actions can open a context menu in a list, form, or column? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'Select the Context Menu related link' },
+      { value: 'b', label: 'Double-click the list, form, or column heading' },
+      { value: 'c', label: 'Right-click the list, form, or column heading' },
+      { value: 'd', label: 'Use Ctrl+M command' },
+      { value: 'e', label: 'Select the context menu icon' }
+    ], correct: ['c', 'e'], discussion: 'C and E are correct. You can open a context menu by right-clicking or by clicking the context menu icon.' },
+
+    { id: 'q247', type: 'single', text: 'A customer wants to update a notification to send to the caller\'s manager. Which approach supports this?', options: [
+      { value: 'a', label: 'In the notification record\'s "Recipients" tab, add the Caller field and dot-walk to the Caller\'s Manager field' },
+      { value: 'b', label: 'Create a flow in the notification record and include notification in "All Recipients" in the flow' },
+      { value: 'c', label: 'In the notification record\'s "Send to" tab, add the Caller field and dot-walk to Caller\'s Manager' },
+      { value: 'd', label: 'In the notification record\'s "Send to" tab, set Recipients to "Subscribable"' }
+    ], correct: ['a'], discussion: 'A is correct. In the notification Recipients tab, add the Caller field and use dot-walking to reach the Caller\'s Manager field.' },
+
+    { id: 'q248', type: 'multi', text: 'Which field attributes can UI Policy Actions change on a form? (Choose 3)', requiredCount: 3, options: [
+      { value: 'a', label: 'Length' },
+      { value: 'b', label: 'Mandatory' },
+      { value: 'c', label: 'Visible/Hidden' },
+      { value: 'd', label: 'Formatting' },
+      { value: 'e', label: 'Read-only' }
+    ], correct: ['b', 'c', 'e'], discussion: 'B, C, and E are correct. UI Policy Actions can change: Mandatory, Visible/Hidden, and Read-only field attributes.' },
+
+    { id: 'q249', type: 'single', text: 'Where do you navigate to add a list of incidents created by a user to the bottom of their user record?', options: [
+      { value: 'a', label: 'Context Menu > Configure > Related Records' },
+      { value: 'b', label: 'Right-click form > Configure > Related Cases' },
+      { value: 'c', label: 'Context Menu > Configure > Related Lists' },
+      { value: 'd', label: 'Right-click form > Configure > Add List' }
+    ], correct: ['c'], discussion: 'C is correct. Context Menu > Configure > Related Lists is where you add related lists to a form.' },
+
+    { id: 'q250', type: 'single', text: 'Which application manages personal tasks using a visual drag-and-drop interface?', options: [
+      { value: 'a', label: 'Service Desk' },
+      { value: 'b', label: 'Virtual Agent Homepage' },
+      { value: 'c', label: 'Visual Task Board' },
+      { value: 'd', label: 'Personal Task Tracker' }
+    ], correct: ['c'], discussion: 'C is correct. Visual Task Boards provide a visual drag-and-drop interface for managing personal tasks.' },
+
+    { id: 'q251', type: 'single', text: 'To display and specify date and time format in an instance, which action do you perform?', options: [
+      { value: 'a', label: 'Select User Menu > Settings > Time Settings > Toggle Display Timezone' },
+      { value: 'b', label: 'Ask the user to adjust timezone on their computer' },
+      { value: 'c', label: 'Use System Properties to modify instance timezone' },
+      { value: 'd', label: 'Select User Menu > Settings > Language & Region > Set Date/Time format and timezone' },
+      { value: 'e', label: 'Create a UI Script to set the default timezone' }
+    ], correct: ['d'], discussion: 'D is correct. For date/time format and timezone, go to User Menu > Settings > Language & Region.' },
+
+    { id: 'q252', type: 'single', text: 'An admin cannot get data they need in a report because it exists in two different tables, and dot-walking is not possible. What else can you try?', options: [
+      { value: 'a', label: 'Export the tables to a spreadsheet' },
+      { value: 'b', label: 'Create a Database View' },
+      { value: 'c', label: 'Create a Report Template' },
+      { value: 'd', label: 'Create a Report Source' },
+      { value: 'e', label: 'Create a custom table' }
+    ], correct: ['b'], discussion: 'B is correct. A Database View allows joining data from multiple tables and creating virtual tables that can be used as report sources.' },
+
+    { id: 'q253', type: 'single', text: 'Which script can run when a record is displayed, inserted, updated, deleted, or when a table is queried?', options: [
+      { value: 'a', label: 'Business Rule' },
+      { value: 'b', label: 'Cheat Script' },
+      { value: 'c', label: 'Record Rule' },
+      { value: 'd', label: 'UI Script' },
+      { value: 'e', label: 'Scheduled Job' }
+    ], correct: ['a'], discussion: 'A is correct. Business Rules run server-side when records are displayed, inserted, updated, deleted, or when tables are queried.' },
+
+    { id: 'q254', type: 'multi', text: 'When viewing a record like an incident, how can you tell if another user is simultaneously editing it? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'A notification appears asking you to collaborate with the new user' },
+      { value: 'b', label: 'A chat window automatically starts' },
+      { value: 'c', label: 'Other user names appear in the work notes list' },
+      { value: 'd', label: 'The user presence icon shows the initials of users viewing the record' },
+      { value: 'e', label: 'An icon appears to the left of fields updated by another user' }
+    ], correct: ['d', 'e'], discussion: 'D and E are correct. User presence icons show who is viewing/editing a record, and icons appear next to fields that have been updated by other users.' },
+
+    { id: 'q255', type: 'single', text: 'Which storefront provides access to pre-built spokes and third-party service integration in a single centralized location?', options: [
+      { value: 'a', label: 'ServiceNow Store' },
+      { value: 'b', label: 'Integration Spoke Store' },
+      { value: 'c', label: 'Spoke Store' },
+      { value: 'd', label: 'ServiceNow Spoke Store' }
+    ], correct: ['a'], discussion: 'A is correct. The ServiceNow Store is the centralized location for accessing pre-built spokes and integrations.' },
+
+    { id: 'q256', type: 'single', text: 'Which policy applies to all data entering the platform (via record forms, Import Sets, or Web Services)?', options: [
+      { value: 'a', label: 'Data Policy' },
+      { value: 'b', label: 'Write Policy' },
+      { value: 'c', label: 'Data Integrity Policy' },
+      { value: 'd', label: 'Data Submission Policy' }
+    ], correct: ['a'], discussion: 'A is correct. Data Policy applies to all data entering the platform regardless of entry method.' },
+
+    { id: 'q257', type: 'multi', text: 'How can you edit the title of an application menu? (Choose 2)', requiredCount: 2, options: [
+      { value: 'a', label: 'Select the application name in the navigator and click the pencil icon' },
+      { value: 'b', label: 'System Definition > Dictionary > Select Application' },
+      { value: 'c', label: 'System Definition > Application Menus > Select the target application' },
+      { value: 'd', label: 'Settings > Application > Select the target application' },
+      { value: 'e', label: 'Select the application form, right-click, Configure > Form Designer' }
+    ], correct: ['a', 'c'], discussion: 'A and C are correct. You can edit the application menu title by: (A) Clicking the pencil icon in the navigator, or (C) via System Definition > Application Menus.' },
+
+    { id: 'q258', type: 'single', text: 'Which field in each record contains a value that uniquely identifies that record?', options: [
+      { value: 'a', label: 'sys_id' },
+      { value: 'b', label: 'sys_number_jd' },
+      { value: 'c', label: 'sys_number' },
+      { value: 'd', label: 'sc_req_item' }
+    ], correct: ['a'], discussion: 'A is correct. The sys_id field contains a unique identifier (GUID) for each record in ServiceNow.' },
+
+    { id: 'q259', type: 'single', text: 'Tables with names starting with u_ or x_ are what type of table?', options: [
+      { value: 'a', label: 'Base tables' },
+      { value: 'b', label: 'Custom tables' },
+      { value: 'c', label: 'Parent tables' },
+      { value: 'd', label: 'Core tables' }
+    ], correct: ['b'], discussion: 'B is correct. Tables starting with u_ (user-created) or x_ (scoped app) are custom tables.' },
+
+    { id: 'q260', type: 'single', text: 'If you have the Impersonate role, which type of user can you NOT impersonate?', options: [
+      { value: 'a', label: 'Catalog User' },
+      { value: 'b', label: 'Customer' },
+      { value: 'c', label: 'System Administrator' },
+      { value: 'd', label: 'VIP' },
+      { value: 'e', label: 'Approver' }
+    ], correct: ['c'], discussion: 'C is correct. Users with the Impersonate role cannot impersonate System Administrators for security reasons.' },
+
+    { id: 'q261', type: 'single', text: 'You are adding a new desktop computer catalog item. The computer has options for: Color (Black/Silver), RAM (32/64MB), Keyboard (Standard/Ergonomic), Monitor (24"/32"). How do you add these options to the catalog item form?', options: [
+      { value: 'a', label: 'Add choices' },
+      { value: 'b', label: 'Add variables' },
+      { value: 'c', label: 'Add UI options' },
+      { value: 'd', label: 'Add fields' }
+    ], correct: ['b'], discussion: 'B is correct. Variables are added to catalog items to provide configurable options for users when ordering.' },
+
+    { id: 'q262', type: 'single', text: 'Which action launches the Form Design interface?', options: [
+      { value: 'a', label: 'Form context menu > Configure > Form Design' },
+      { value: 'b', label: 'Form context menu > Configure > Form Layout > Designer' },
+      { value: 'c', label: 'Form context menu > User Experience > UX Dashboard' },
+      { value: 'd', label: 'Form context menu > Configure > Form > Developer' }
+    ], correct: ['a'], discussion: 'A is correct. Context Menu > Configure > Form Design opens the Form Design interface.' },
+
+    { id: 'q263', type: 'single', text: 'Which form element displays an activity list or history on a task form?', options: [
+      { value: 'a', label: 'Action Formatter' },
+      { value: 'b', label: 'Activity Formatter' },
+      { value: 'c', label: 'Action Stream' },
+      { value: 'd', label: 'Sidebar' }
+    ], correct: ['b'], discussion: 'B is correct. The Activity Formatter is a form element that displays the complete activity history on a task form.' },
+
+    { id: 'q264', type: 'single', text: 'Which feature helps define rules that restrict what data users can view and interact with?', options: [
+      { value: 'a', label: 'CRUD Rules' },
+      { value: 'b', label: 'Access Control Rules' },
+      { value: 'c', label: 'Role Assignment Rules' },
+      { value: 'd', label: 'Scripted User Rules' }
+    ], correct: ['b'], discussion: 'B is correct. Access Control Rules (ACLs) define what data users can view and interact with.' },
+
+    { id: 'q265', type: 'single', text: 'To add a list of incidents created by a user to the bottom of their user record, where do you navigate?', options: [
+      { value: 'a', label: 'Context Menu > Configure > Related Records' },
+      { value: 'b', label: 'Right-click form > Configure > Related Cases' },
+      { value: 'c', label: 'Context Menu > Configure > Related Lists' },
+      { value: 'd', label: 'Right-click form > Configure > Add List' }
+    ], correct: ['c'], discussion: 'C is correct. Related Lists are configured via Context Menu > Configure > Related Lists.' },
+
+    { id: 'q266', type: 'single', text: 'Where is the "Impersonate User" option found in a ServiceNow instance?', options: [
+      { value: 'a', label: 'User Menu' },
+      { value: 'b', label: 'Content Frame' },
+      { value: 'c', label: 'Application Navigator' },
+      { value: 'd', label: 'Modules' }
+    ], correct: ['a'], discussion: 'A is correct. "Impersonate User" is accessed via the User Menu in the banner area.' },
+
+    { id: 'q267', type: 'single', text: 'UI Policies run on which side of the application?', options: [
+      { value: 'a', label: 'Client side (browser)' },
+      { value: 'b', label: 'Server side (application)' },
+      { value: 'c', label: 'Server side (database)' },
+      { value: 'd', label: 'Inside server-side scripts' }
+    ], correct: ['a'], discussion: 'A is correct. UI Policies run on the client side (in the user\'s browser).' },
+
+    { id: 'q268', type: 'single', text: 'Which section of a task record shows the most recent updates?', options: [
+      { value: 'a', label: 'Audit Log' },
+      { value: 'b', label: 'Timeline' },
+      { value: 'c', label: 'Activity' },
+      { value: 'd', label: 'Journal' }
+    ], correct: ['c'], discussion: 'C is correct. The Activity section shows the most recent updates to a task record.' },
+
+    { id: 'q269', type: 'single', text: 'The employee onboarding team needs a way for managers to order a computer, monitor, business cards, and cell phone for new hires. How do you proceed?', options: [
+      { value: 'a', label: 'Create requested items' },
+      { value: 'b', label: 'Create record producers' },
+      { value: 'c', label: 'Create an onboarding bot' },
+      { value: 'd', label: 'Create an Order Guide' }
+    ], correct: ['d'], discussion: 'D is correct. An Order Guide bundles multiple catalog items into a single request, perfect for onboarding scenarios with multiple items.' },
+
+    { id: 'q270', type: 'single', text: 'What in the CI Dependency View enables tracing from an infrastructure item to services that depend on it?', options: [
+      { value: 'a', label: 'Auto-mapping Utility' },
+      { value: 'b', label: 'Relationships' },
+      { value: 'c', label: 'Service Tracer' },
+      { value: 'd', label: 'Transform Map' }
+    ], correct: ['b'], discussion: 'B is correct. Relationships in the CMDB enable tracing between CIs and dependent services.' },
+
+    { id: 'q271', type: 'single', text: 'What do you click in a related list to customize the column layout?', options: [
+      { value: 'a', label: 'Gear' },
+      { value: 'b', label: 'Context menu' },
+      { value: 'c', label: 'Pencil' },
+      { value: 'd', label: 'Magnifier' }
+    ], correct: ['a'], discussion: 'A is correct. The Gear icon in a related list is used to customize the column layout.' },
+
+    { id: 'q272', type: 'single', text: 'Which language is used for scripting in ServiceNow?', options: [
+      { value: 'a', label: 'C++' },
+      { value: 'b', label: 'JavaScript' },
+      { value: 'c', label: 'PHP' },
+      { value: 'd', label: 'Python' }
+    ], correct: ['b'], discussion: 'B is correct. ServiceNow uses JavaScript for all scripting including Business Rules, Client Scripts, and Script Includes.' },
+
+    { id: 'q273', type: 'multi', text: 'What are examples of UI Actions related to lists? (Choose 4)', requiredCount: 4, options: [
+      { value: 'a', label: 'List Link' },
+      { value: 'b', label: 'List Choice' },
+      { value: 'c', label: 'List Button' },
+      { value: 'd', label: 'List Override' },
+      { value: 'e', label: 'List Context Menu' },
+      { value: 'f', label: 'List Control' }
+    ], correct: ['a', 'b', 'c', 'e'], discussion: 'A, B, C, and E are correct. List-related UI Actions include: List Link, List Choice, List Button, and List Context Menu.' },
+
+    { id: 'q274', type: 'single', text: 'A service catalog project requires 80 catalog items. Each item needs 4 common fields. Other variables are item-specific. What feature should you use when designing these catalog items?', options: [
+      { value: 'a', label: 'Create a variable set template and apply to all catalog items' },
+      { value: 'b', label: 'Create one variable set for the 4 variables and add it to all 80 catalog items' },
+      { value: 'c', label: 'Create a record producer with the 4 fields and add to catalog items\' related list' },
+      { value: 'd', label: 'Create a Flow Designer action with variable set data pills and apply to all 80 catalog items' },
+      { value: 'e', label: 'Create an Order Guide with all variables and copy/hide as needed' }
+    ], correct: ['b'], discussion: 'B is correct. A Variable Set is a reusable collection of variables. Create one variable set with the 4 common variables and attach it to all 80 catalog items.' },
+
+    { id: 'q275', type: 'single', text: 'A task assignee wants to monitor updates on records assigned to them (like customer responses). What do you suggest?', options: [
+      { value: 'a', label: 'Select the activity stream icon in My Work list to show a live update frame' },
+      { value: 'b', label: 'Click the magnifier icon to expand the "Monitor" frame' },
+      { value: 'c', label: 'Open an Agent Workspace tab for each record to monitor' },
+      { value: 'd', label: 'Select Service Desk > My Work Dashboard' }
+    ], correct: ['a'], discussion: 'A is correct. The activity stream icon in the My Work list allows viewing live updates for assigned records.' },
+
+    { id: 'q276', type: 'single', text: 'To access the Knowledge Base, which access level does a user need?', options: [
+      { value: 'a', label: 'sn_knowledge_import' },
+      { value: 'b', label: 'sn_knowledge_contribute' },
+      { value: 'c', label: 'Can Contribute' },
+      { value: 'd', label: 'Can Import' }
+    ], correct: ['c'], discussion: 'C is correct. Users need the "Can Contribute" access (user criteria) to import articles into a Knowledge Base.' },
+
+    { id: 'q277', type: 'single', text: 'Which step in the import process defines where columns from input data will be written in the target table?', options: [
+      { value: 'a', label: 'Schedule Transform' },
+      { value: 'b', label: 'Field Matching' },
+      { value: 'c', label: 'Select Data Source' },
+      { value: 'd', label: 'Create Transform Map' },
+      { value: 'e', label: 'Load Data' }
+    ], correct: ['d'], discussion: 'D is correct. Creating a Transform Map defines the field-level mapping from source to target.' }
+  ]
+};
+
+    const autoNextDelayMs = 1500;
+    const BLOCK_SIZE = 60;
+
+    let baseQuiz = JSON.parse(JSON.stringify(quizData));
+    let quiz = null;
+    let globalOrder = [];
+    let blocks = [];
+    let currentBlock = 0;
+    let current = 0;
+    let score = 0;
+
+    const elQnum = document.getElementById('qnum');
+    const elQtotal = document.getElementById('qtotal');
+    const elBar = document.getElementById('bar');
+    const elScore = document.getElementById('score');
+    const elBlock = document.getElementById('question-block');
+    const elFeedback = document.getElementById('feedback');
+    const elDiscussion = document.getElementById('discussion');
+    const btnNext = document.getElementById('next-btn');
+    const chkAuto = document.getElementById('auto-next');
+    const chkRandQ = document.getElementById('rand-questions');
+    const chkRandO = document.getElementById('rand-options');
+    const btnReshuffle = document.getElementById('reshuffle-btn');
+    const btnShowExplain = document.getElementById('show-explain-btn');
+    const elBlockIndex = document.getElementById('block-index');
+    const elBlockTotal = document.getElementById('block-total');
+    const btnBlockPrev = document.getElementById('block-prev');
+    const btnBlockNext = document.getElementById('block-next');
+    const btnGotoNextBlock = document.getElementById('goto-next-block');
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function buildGlobalOrder() {
+      const qlist = baseQuiz.questions.map(q => ({
+        id: q.id, type: q.type, text: q.text, requiredCount: q.requiredCount,
+        options: q.options.slice(), correct: q.correct.slice(), discussion: q.discussion
+      }));
+      globalOrder = chkRandQ.checked ? shuffle(qlist) : qlist;
+      blocks = [];
+      for (let i = 0; i < globalOrder.length; i += BLOCK_SIZE) {
+        const chunk = globalOrder.slice(i, i + BLOCK_SIZE);
+        if (chkRandO.checked) chunk.forEach(q => { q.options = shuffle(q.options); });
+        blocks.push(chunk);
+      }
+    }
+
+    function loadBlock(index) {
+      currentBlock = Math.max(0, Math.min(index, blocks.length - 1));
+      quiz = { title: baseQuiz.title, questions: (blocks[currentBlock] || []) };
+      current = 0; score = 0;
+      elBlockIndex.textContent = (currentBlock + 1);
+      elBlockTotal.textContent = blocks.length;
+      render();
+    }
+
+    function render() {
+      const q = quiz.questions[current];
+      elQnum.textContent = (current + 1);
+      elQtotal.textContent = quiz.questions.length;
+      elBar.style.width = ((current) / quiz.questions.length * 100) + '%';
+      elScore.textContent = score;
+      elFeedback.classList.add('hidden');
+      elDiscussion.classList.add('hidden');
+      elDiscussion.textContent = '';
+      btnShowExplain.classList.add('hidden');
+      btnNext.disabled = true;
+      elBlock.classList.remove('disabled');
+
+      const pickInfo = (q.requiredCount && q.requiredCount > 0) ? ` (Choose ${q.requiredCount})` : (q.type === 'multi' ? ` (Choose ${q.correct.length})` : '');
+      let html = `<div class="question-title">【Q${current+1}】${escapeHtml(q.text)} ${pickInfo}</div>`;
+      html += '<div class="options">';
+      if (q.type === 'multi' || (q.requiredCount && q.requiredCount !== 1)) {
+        for (const o of q.options) {
+          html += `<label data-value="${o.value}"><input type="checkbox" name="q_${q.id}" value="${o.value}"> ${escapeHtml(o.label)}</label>`;
+        }
+      } else {
+        for (const o of q.options) {
+          html += `<label data-value="${o.value}"><input type="radio" name="q_${q.id}" value="${o.value}"> ${escapeHtml(o.label)}</label>`;
+        }
+      }
+      html += '</div>';
+      elBlock.innerHTML = html;
+    }
+
+    function getInputs() {
+      const q = quiz.questions[current];
+      return [...document.querySelectorAll('input[name="q_' + q.id + '"]')];
+    }
+    function getSelected() { return getInputs().filter(i => i.checked).map(i => i.value); }
+
+    function grade() {
+      const q = quiz.questions[current];
+      const selected = getSelected();
+      const required = q.requiredCount || null;
+      if (required && selected.length !== required) {
+        showFeedback(`This question requires choosing ${required} answers (currently ${selected.length}). Please re-select.`, false);
+        return;
+      }
+      if (selected.length === 0) { showFeedback('Please select at least one answer.', false); return; }
+      const ok = (q.type === 'multi') ? exact(selected, q.correct) : (selected.length === 1 && q.correct.includes(selected[0]));
+      const partial = overlap(selected, q.correct);
+      if (ok) score++;
+      highlightAfterGrade(q.correct, selected);
+      showFeedback(ok ? '✅ Correct!' : (partial ? '⚠️ Partially correct. Try again.' : '❌ Incorrect.'), ok);
+      showDiscussion(q.discussion);
+      btnNext.disabled = false;
+      if (chkAuto.checked) setTimeout(next, autoNextDelayMs);
+    }
+
+    function showFeedback(msg, ok) {
+      elFeedback.textContent = msg;
+      elFeedback.className = 'feedback ' + (ok ? 'ok' : 'ng');
+      elFeedback.classList.remove('hidden');
+    }
+    function showDiscussion(text) {
+      elDiscussion.textContent = text;
+      elDiscussion.classList.add('hidden'); // hidden by default, revealed by button
+      btnShowExplain.classList.remove('hidden');
+      btnShowExplain.textContent = '💡 Show Explanation';
+      for (const i of getInputs()) i.disabled = true;
+      elBlock.classList.add('disabled');
+    }
+    function reset() { render(); elFeedback.classList.add('hidden'); elFeedback.textContent=''; elDiscussion.classList.add('hidden'); elDiscussion.textContent=''; btnShowExplain.classList.add('hidden'); btnNext.disabled = true; }
+    function next() { if (current < quiz.questions.length - 1) { current++; render(); } else { finish(); } }
+    function finish() {
+      document.getElementById('quiz-card').classList.add('hidden');
+      const res = document.getElementById('result-card');
+      document.getElementById('final-score').textContent = String(score);
+      document.getElementById('final-total').textContent = String(quiz.questions.length);
+      res.classList.remove('hidden');
+      elBar.style.width = '100%';
+    }
+    function retry() { current = 0; score = 0; render(); document.getElementById('result-card').classList.add('hidden'); document.getElementById('quiz-card').classList.remove('hidden'); }
+
+    function gotoNextBlock() {
+      if (currentBlock < blocks.length - 1) {
+        loadBlock(currentBlock + 1);
+        document.getElementById('result-card').classList.add('hidden');
+        document.getElementById('quiz-card').classList.remove('hidden');
+      }
+    }
+
+    function highlightAfterGrade(correct, selected) {
+      const setC = new Set(correct), setS = new Set(selected);
+      for (const input of getInputs()) {
+        const label = input.parentElement; const v = input.value;
+        if (setC.has(v)) label.classList.add('is-correct');
+        if (setS.has(v)) label.classList.add('is-selected');
+        if (setS.has(v) && !setC.has(v)) label.classList.add('is-wrongselected');
+      }
+    }
+    function exact(selected, correct) { if (selected.length !== correct.length) return false; const s=new Set(selected), c=new Set(correct); for (const v of s) if (!c.has(v)) return false; return true; }
+    function overlap(selected, correct) { const c=new Set(correct); return selected.some(v => c.has(v)); }
+    function escapeHtml(str) { return String(str).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+    document.getElementById('submit-btn').addEventListener('click', grade);
+    document.getElementById('next-btn').addEventListener('click', next);
+    document.getElementById('reset-btn').addEventListener('click', reset);
+    document.getElementById('retry-btn').addEventListener('click', retry);
+    btnShowExplain.addEventListener('click', () => {
+      if (elDiscussion.classList.contains('hidden')) {
+        elDiscussion.classList.remove('hidden');
+        btnShowExplain.textContent = '🙈 Hide Explanation';
+      } else {
+        elDiscussion.classList.add('hidden');
+        btnShowExplain.textContent = '💡 Show Explanation';
+      }
+    });
+    btnReshuffle.addEventListener('click', () => { buildGlobalOrder(); loadBlock(currentBlock); });
+    btnBlockPrev.addEventListener('click', () => { if (currentBlock > 0) loadBlock(currentBlock - 1); });
+    btnBlockNext.addEventListener('click', () => { if (currentBlock < blocks.length - 1) loadBlock(currentBlock + 1); });
+    btnGotoNextBlock.addEventListener('click', gotoNextBlock);
+
+    function init() {
+      buildGlobalOrder();
+      loadBlock(0);
+    }
+    init();
+  </script>
+</body>
+</html>
